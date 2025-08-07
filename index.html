@@ -52,7 +52,6 @@
 <body>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
 
-<!-- ✅ 패널 UI -->
 <div id="panel">
   <input type="text" id="keyword" placeholder="키워드를 입력하세요 (예: L0, L003, 범자, 범 피, 전화번호 일부)" />
   <button onclick="searchAndShow()">검색</button>
@@ -70,48 +69,38 @@
 <div id="map"></div>
 
 <script>
-
-/* ✅ ID 정규화 함수 */
-function normalizeId(id) {
-  return id.split("(")[0].trim().toUpperCase();
-}
-
 /* ------------------------ ✅ 데이터 정의 ------------------------ */
 const lampData = {
 
-  "L001": { 분류:"가로등", 고유이름:"L001", 전화번호:"02-2345-4444", 주소:"서울 양천구 합정동", 특이사항:"중요", 좌표:"37.391721,126.652404" },
+  "L001": { 분류:"가로등", 고유이름:"L001", 전화번호:"02-2345-4444", 주소:"서울 양천구 합정동", 특이사항:"중요", 좌표:"37.385719,126.658645" },
 
-  "L002": { 분류:"가로등", 고유이름:"L002", 전화번호:"02-2345-7744", 주소:"서울 양천구 합정동", 특이사항:"점검 필요", 좌표:"37.386138,126.658433" },
+  "L002": { 분류:"가로등", 고유이름:"L002", 전화번호:"02-2345-7744", 주소:"서울 양천구 합정동", 특이사항:"점검 필요", 좌표:"37.386500,126.660000" },
 
-  "L003": { 분류:"가로등", 고유이름:"L003", 전화번호:"02-2345-4488", 주소:"", 특이사항:"중요", 좌표:"37.391747,126.652425" },
+  "L003": { 분류:"가로등", 고유이름:"L003", 전화번호:"02-2345-4488", 주소:"", 특이사항:"중요", 좌표:"37.387000,126.661000" },
 
-  "L004": { 분류:"가로등", 고유이름:"L004", 전화번호:"02-2345-4488", 주소:"", 특이사항:"중요", 좌표:"37.391747,126.652425" },
+  "CV1(42호)": { 분류:"안전조치", 고유이름:"박00", 전화번호:"", 주소:"오목로37길 11(그린빌라)", 특이사항:"25.5.16~25.8.26. 22:00~23:00, 42호)", 좌표:"37.526140,126.856032" },
 
-  "CV1": { 분류:"범죄피해자", 고유이름:"CV1", 전화번호:"", 주소:"오목로37길", 특이사항:"25.5.16~25.8.26. 22:00~23:00, 42호)", 좌표:"37.526140,126.856032" },
+  "CV3(43호)": { 분류:"안전조치", 고유이름:"이00", 전화번호:"", 주소:"오목로34길7", 특이사항:"7.8~9.7(매일 22~23시)", 좌표:"37.524296,126.855753" },
 
-  "CV2": { 분류:"범죄피해자", 고유이름:"CV2", 전화번호:"", 주소:"오목로24길", 특이사항:"7.5~8.4(매일 22~23시)", 좌표:"37.522740,126.854003" },
+  "CV4(41호)": { 분류:"안전조치", 고유이름:"박00", 전화번호:"", 주소:"신목로5 목동삼성아파트 105동", 특이사항:"5.22~8.21(매일 13~14, 22~23)", 좌표:"37.517046,126.876516" },
 
-  "CV3": { 분류:"범죄피해자", 고유이름:"CV3", 전화번호:"", 주소:"오목로34길", 특이사항:"7.8~9.7(매일 22~23시)", 좌표:"37.524296,126.855753" },
+  "CV5(42호)": { 분류:"안전조치", 고유이름:"허00", 전화번호:"", 주소:"목동로23길35", 특이사항:"4.15~8.14(매일 12~13시)", 좌표:"37.527701,126.859364" },
 
-  "CV4": { 분류:"범죄피해자", 고유이름:"CV4", 전화번호:"", 주소:"신목로5 목동삼성아파트", 특이사항:"5.22~8.21(매일 13~14, 22~23)", 좌표:"37.517046,126.876516" },
+  "CV6(43호)": { 분류:"안전조치", 고유이름:"서00", 전화번호:"", 주소:"은행정로42 신서고등학교", 특이사항:"6.8~9.7(월~금 8~9, 22~23시)", 좌표:"37.523921,126.860085" },
 
-  "CV5": { 분류:"범죄피해자", 고유이름:"CV5", 전화번호:"", 주소:"목돌로23길", 특이사항:"4.15~8.14(매일 12~13시)", 좌표:"37.527701,126.859364" },
+  "CV7(43호)": { 분류:"안전조치", 고유이름:"오00", 전화번호:"", 주소:"목동로11길 33", 특이사항:"5.23~8.22(매일 23~24시)", 좌표:"37.522949,126.861280" },
 
-  "CV6": { 분류:"범죄피해자", 고유이름:"CV6", 전화번호:"", 주소:"은행정로42 신서고등학교", 특이사항:"6.8~9.7(월~금 8~9, 22~23시)", 좌표:"37.523921,126.860085" },
+  "CV8(42호)": { 분류:"안전조치", 고유이름:"강00", 전화번호:"", 주소:"중앙로52길 50", 특이사항:"7.15~8.14(매일 9~10, 21~22)", 좌표:"37.525925,126.855922" },
 
-  "CV7": { 분류:"범죄피해자", 고유이름:"CV7", 전화번호:"", 주소:"목동로11길 )", 특이사항:"5.23~8.22(매일 23~24시)", 좌표:"37.522949,126.861280" },
+  "CV10(42호)": { 분류:"안전조치", 고유이름:"김00", 전화번호:"", 주소:"목동로 193", 특이사항:"7.19~8.17(11~12, 21~22))", 좌표:"37.525567,126.858867" },
 
-  "CV8": { 분류:"범죄피해자", 고유이름:"CV8", 전화번호:"", 주소:"중앙로52길", 특이사항:"7.15~8.14(매일 9~10, 21~22)", 좌표:"37.525925,126.855922" },
+  "CV11(41호)": { 분류:"안전조치", 고유이름:"조00", 전화번호:"", 주소:"신목로5길 15", 특이사항:"7.19~8.18(13~14시)", 좌표:"37.517567,126.872267" },
 
-  "CV9": { 분류:"범죄피해자", 고유이름:"CV9", 전화번호:"", 주소:"목동로19길", 특이사항:"7.8~8.7(순찰미실시)", 좌표:"37.524588,126.861030" },
+  "CV11-1(41호)": { 분류:"안전조치", 고유이름:"조00", 전화번호:"", 주소:"쌍용아파트 102동", 특이사항:"7.19~8.18(13~14시)", 좌표:"37.518182,126.875558" },
 
-  "CV10": { 분류:"범죄피해자", 고유이름:"CV10", 전화번호:"", 주소:"목동로 193", 특이사항:"7.19~8.17(11~12, 21~22))", 좌표:"37.525567,126.858867" },
+  "CV12(41호)": { 분류:"안전조치", 고유이름:"채00", 전화번호:"", 주소:"오목로354 101동", 특이사항:"7.18~8.17(15~16, 22~23)", 좌표:"37.523919,126.876851" },
 
-  "CV11": { 분류:"범죄피해자", 고유이름:"CV11", 전화번호:"", 주소:"신목로5길", 특이사항:"7.19~8.18(13~14시)", 좌표:"37.517567,126.872267" },
-
-  "CV12": { 분류:"범죄피해자", 고유이름:"CV12", 전화번호:"", 주소:"오목로354", 특이사항:"7.18~8.17(15~16, 22~23)", 좌표:"37.523919,126.876851" },
-
-  "CV13": { 분류:"범죄피해자", 고유이름:"CV13", 전화번호:"", 주소:"오목로300", 특이사항:"7.31~8.30(05~06, 19~20)", 좌표:"37.524183,126.870829" },
+  "CV13(41호)": { 분류:"안전조치", 고유이름:"김000", 전화번호:"", 주소:"오목로300 204동", 특이사항:"7.31~8.30(05~06, 19~20)", 좌표:"37.524183,126.870829" },
 
   "PP1": { 분류:"공중전화", 고유이름:"PP1", 전화번호:"02-2696-2896", 주소:"목동로 189", 특이사항:"제일은행 앞", 좌표:"37.525392,126.864424" },
 
@@ -140,17 +129,8 @@ const lampData = {
 };
 
 const patrolSchedule = [
-  { id:"L001", startDate:"2025-05-16", endDate:"2025-08-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"11:00", end:"12:00" }] },
-
-  { id:"L002", startDate:"2025-05-16", endDate:"2025-08-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"11:00", end:"13:00" }] },
-
-  { id:"L003", startDate:"2025-05-16", endDate:"2025-08-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"11:00", end:"16:00" }] },
-
-  { id:"L004", startDate:"2025-05-16", endDate:"2025-08-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"11:00", end:"17:00" }] },
 
   { id:"CV1(42호)", startDate:"2025-05-16", endDate:"2025-08-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"22:00", end:"23:00" }] },
-
-  { id:"CV2(43호)", startDate:"2025-07-05", endDate:"2025-08-04", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"22:00", end:"23:00" }] },
 
   { id:"CV3(43호)", startDate:"2025-07-08", endDate:"2025-09-07", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"22:00", end:"23:00" }] },
 
@@ -175,24 +155,15 @@ const patrolSchedule = [
   { id:"CV13(41호)", startDate:"2025-07-31", endDate:"2025-08-30", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"05:00", end:"06:00" },{ start:"19:00", end:"20:00" }] },
 
 ];
-
-/* ✅ 유틸 함수 */
+/* ✅ 날짜/시간 유틸 함수 */
 function isWithinDateRange(dateStr,startDateStr,endDateStr){ const d=new Date(dateStr); return d>=new Date(startDateStr)&&d<=new Date(endDateStr); }
 function isDayAllowed(date,days){return days.includes(date.getDay());}
 function parseCoords(s){const[a,b]=s.split(",").map(Number);return{lat:a,lng:b};}
 function pad(n){ return n.toString().padStart(2,"0"); }
 function normalizeText(str){ return (str||"").toLowerCase().replace(/[\s\-\_\.,]/g,""); }
 function isSequenceMatch(text, keyword){ let idx=0; for(const ch of keyword){ idx=text.indexOf(ch, idx); if(idx === -1) return false; idx++; } return true; }
-function deg2rad(d){return d*(Math.PI/180);}
-function getDistanceM(c1,c2){
-  const R=6371000;
-  const dLat=deg2rad(c2.lat-c1.lat);
-  const dLon=deg2rad(c2.lng-c1.lng);
-  const a=Math.sin(dLat/2)**2+Math.cos(deg2rad(c1.lat))*Math.cos(deg2rad(c2.lat))*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
 
-/* ✅ 로컬스토리지 */
+/* ✅ 로컬스토리지 관리 */
 function getTodayKey(){ return "patrol_" + new Date().toISOString().slice(0,10); }
 function loadCompletedPatrols(){ const data=localStorage.getItem(getTodayKey()); return data?new Set(JSON.parse(data)):new Set(); }
 function saveCompletedPatrols(){ localStorage.setItem(getTodayKey(), JSON.stringify([...completedPatrols])); }
@@ -203,131 +174,7 @@ let activePatrol = null;
 let lastClickedCoord = "";
 let map, markers=[], infoWindow;
 
-/* ✅ 지도 초기화 */
-function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.3857,lng:126.6586},zoom:15});
-  infoWindow=new google.maps.InfoWindow();
-  map.addListener("click",e=>{
-    lastClickedCoord=`${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
-    document.getElementById("clickedCoords").innerText=`📍 클릭 좌표: ${lastClickedCoord}`;
-  });
-}
-
-/* ✅ GPS 자동완료 (ID 매칭 개선 적용) */
-function checkProximityAndAutoComplete(coords) {
-  if (!activePatrol) return;
-
-  let patrolId = normalizeId(activePatrol.task.id);
-  if (!lampData[patrolId]) {
-    const matchKey = Object.keys(lampData).find(k => patrolId.startsWith(k));
-    if (matchKey) {
-      console.log(`✅ ID 보정: ${patrolId} → ${matchKey}`);
-      patrolId = matchKey;
-    } else {
-      console.error(`🚫 ID 매칭 실패: ${activePatrol.task.id}`);
-      return;
-    }
-  }
-
-  const target = parseCoords(lampData[patrolId].좌표);
-  const user = { lat: coords.latitude, lng: coords.longitude };
-  const dist = getDistanceM(user, target);
-  console.log(`📍 현재 거리: ${dist.toFixed(1)}m (${patrolId})`);
-
-  if (dist <= 50 && !completedPatrols.has(activePatrol.key)) {
-    completePatrol(true);
-  }
-}
-
-/* ✅ 좌표 복사 */
-function copyCoords(){
-  if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하세요."); return; }
-  navigator.clipboard.writeText(lastClickedCoord).then(()=>alert("✅ 복사됨: "+lastClickedCoord));
-}
-
-/* ✅ 마커 관리 */
-function clearMarkers(){ markers.forEach(m=>m.setMap(null)); markers=[]; }
-function addMarker(id,pos,color){
-  const m=new google.maps.Marker({position:pos,map,label:id,icon:{url:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`}});
-  m.addListener("click", () => {
-    const data = lampData[id];
-    infoWindow.setContent(`
-      <div style="min-width:150px;">
-        <strong>${data.고유이름}</strong><br/>
-        <b>분류:</b> ${data.분류}<br/>
-        <b>전화번호:</b> ${data.전화번호}<br/>
-        <b>주소:</b> ${data.주소}<br/>
-        <b>특이사항:</b> ${data.특이사항}
-      </div>
-    `);
-    infoWindow.open(map, m);
-  });
-  m.addListener("dblclick",()=>{const c=lampData[id].좌표.split(",");window.open(`https://www.google.com/maps/dir/?api=1&destination=${c[0]},${c[1]}`,"_blank");});
-  markers.push(m);
-}
-
-/* ✅ 검색 */
-function searchAndShow(){
-  const kw=document.getElementById("keyword").value.trim();
-  if(!kw){ alert("⚠️ 키워드 입력하세요."); return; }
-  clearMarkers();
-  const kwNoSpace=kw.replace(/\s+/g,"").toLowerCase();
-  if(kwNoSpace.length<2){ alert("⚠️ 최소 2글자 이상 입력"); return; }
-
-  const res=Object.keys(lampData).filter(id=>{
-    const d=lampData[id];
-    const name=normalizeText(d.고유이름);
-    if(name===kwNoSpace) return true;
-    if(/^l\d+$/i.test(d.고유이름)&&d.고유이름.toLowerCase().endsWith(kwNoSpace)) return true;
-    if(isSequenceMatch(name,kwNoSpace)) return true;
-    if(normalizeText(d.전화번호).includes(kwNoSpace)) return true;
-    if([d.주소,d.분류,d.특이사항].some(f=>isSequenceMatch(normalizeText(f),kwNoSpace))) return true;
-    return false;
-  }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
-
-  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
-  const bounds=new google.maps.LatLngBounds();
-  res.forEach(r=>{addMarker(r.id,r.pos,"blue");bounds.extend(r.pos);});
-  map.fitBounds(bounds);
-}
-
-/* ✅ 순찰 완료 */
-function completePatrol(auto=false){
-  if(!activePatrol){ if(!auto) alert("🚫 진행 중인 순찰이 없습니다."); return; }
-  if(completedPatrols.has(activePatrol.key)) return;
-
-  completedPatrols.add(activePatrol.key);
-  saveCompletedPatrols();
-
-  const patrolId=activePatrol.task.id.split("(")[0];
-  const data=lampData[patrolId];
-  const time=new Date().toLocaleString("ko-KR");
-  const logLine=`${auto?"[자동완료]":"[수동완료]"} ${patrolId} | ${time} | ${data?data.주소:"주소 없음"}\n`;
-
-  const old=localStorage.getItem("patrol_text_log")||"";
-  const newLog=old+logLine;
-  localStorage.setItem("patrol_text_log",newLog);
-
-  const blob=new Blob([newLog],{type:"text/plain"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;a.download="patrol_log.txt";
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  alert(`✅ ${patrolId} 순찰 완료! (${auto?"GPS 자동":"수동"})`);
-  activePatrol=null;
-  showUpcomingPatrols();
-}
-
-/* ✅ 길찾기 */
-function navigateToPatrol(){
-  if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); return; }
-  const [lat,lng]=lastClickedCoord.split(",");
-  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,"_blank");
-}
-
-/* ✅ 예정 순찰 표시 */
+/* ✅ 순찰 리스트 표시 */
 function showUpcomingPatrols(){
   const now=new Date(), nowM=now.getHours()*60+now.getMinutes();
   const list=document.getElementById("upcomingList");
@@ -362,45 +209,119 @@ function showUpcomingPatrols(){
     li.textContent=`${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
     li.onclick=()=>{
       activePatrol={task:item.task,hour:item.hour,minute:item.minute,key:item.key};
-      const baseId=item.task.id.split("(")[0];
-      if(!lampData[baseId]){ alert("해당 ID의 좌표 정보가 없습니다."); return; }
-      const pos=parseCoords(lampData[baseId].좌표);
+      const id = item.task.id;
+      if(!lampData[id]){ alert("해당 ID의 좌표 정보가 없습니다."); return; }
+      const pos=parseCoords(lampData[id].좌표);
       window.open(`https://www.google.com/maps/dir/?api=1&destination=${pos.lat},${pos.lng}`,"_blank");
     };
     list.appendChild(li);
   });
 }
 
+/* ------------------------ ✅ 지도 기능 ------------------------ */
+function initMap(){
+  map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.3857,lng:126.6586},zoom:15});
+  infoWindow=new google.maps.InfoWindow();
+  map.addListener("click",e=>{
+    lastClickedCoord=`${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
+    document.getElementById("clickedCoords").innerText=`📍 클릭 좌표: ${lastClickedCoord}`;
+  });
+}
+function copyCoords(){ if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하세요."); return; } navigator.clipboard.writeText(lastClickedCoord).then(()=>alert("✅ 복사됨: "+lastClickedCoord)); }
+function clearMarkers(){ markers.forEach(m=>m.setMap(null)); markers=[]; }
+function addMarker(id,pos,color){
+  const m=new google.maps.Marker({position:pos,map,label:id,icon:{url:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`}});
+  m.addListener("click", () => {
+    const data = lampData[id];
+    infoWindow.setContent(`
+      <div style="min-width:150px;">
+        <strong>${data.고유이름}</strong><br/>
+        <b>분류:</b> ${data.분류}<br/>
+        <b>전화번호:</b> ${data.전화번호}<br/>
+        <b>주소:</b> ${data.주소}<br/>
+        <b>특이사항:</b> ${data.특이사항}
+      </div>
+  `  );
+    infoWindow.open(map, m);
+  });
+  m.addListener("dblclick",()=>{const c=lampData[id].좌표.split(",");window.open(`https://www.google.com/maps/dir/?api=1&destination=${c[0]},${c[1]}`,"_blank");});
+  markers.push(m);
+}
+
+/* ✅ 검색 */
+function searchAndShow(){
+  const kw=document.getElementById("keyword").value.trim();
+  if(!kw){ alert("⚠️ 키워드 입력하세요."); return; }
+  clearMarkers();
+  const kwNoSpace=kw.replace(/\s+/g,"").toLowerCase();
+  if(kwNoSpace.length<2){ alert("⚠️ 최소 2글자 이상 입력"); return; }
+
+  const res=Object.keys(lampData).filter(id=>{
+    const d=lampData[id];
+    const name=normalizeText(d.고유이름);
+    if(name===kwNoSpace) return true;
+    if(/^l\d+$/i.test(d.고유이름)&&d.고유이름.toLowerCase().endsWith(kwNoSpace)) return true;
+    if(isSequenceMatch(name,kwNoSpace)) return true;
+    if(normalizeText(d.전화번호).includes(kwNoSpace)) return true;
+    if([d.주소,d.분류,d.특이사항].some(f=>isSequenceMatch(normalizeText(f),kwNoSpace))) return true;
+    return false;
+  }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
+
+  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
+  const bounds=new google.maps.LatLngBounds();
+  res.forEach(r=>{addMarker(r.id,r.pos,"blue");bounds.extend(r.pos);});
+  map.fitBounds(bounds);
+}
+
+/* ✅ 길찾기 버튼 */
+function navigateToPatrol(){
+  if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); return; }
+  const [lat,lng]=lastClickedCoord.split(",");
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,"_blank");
+}
+
+/* ✅ 📌 순찰 완료 → 로그 파일에 append */
+function completePatrol(){
+  if(!activePatrol){ alert("🚫 진행 중인 순찰이 없습니다."); return; }
+  completedPatrols.add(activePatrol.key);
+  saveCompletedPatrols();
+
+  const patrolId = activePatrol.task.id;  // (예: "CV11(41호)")
+  const data = lampData[patrolId];
+  const patrolTime = new Date().toLocaleString("ko-KR");
+  const logLine = `아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름 || "이름 정보 없음"},  주소: ${data?.주소 || "주소 정보 없음"}\n`;
+
+
+  // ✅ 기존 로그가 있으면 이어붙이기
+  const existingLog = localStorage.getItem("patrol_text_log") || "";
+  const newLog = existingLog + logLine;
+  localStorage.setItem("patrol_text_log", newLog);
+
+  // ✅ 하나의 파일로 다운로드
+  const blob = new Blob([newLog], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "patrol_log.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  alert(`✅ ${activePatrol.task.id} (${activePatrol.key.split("|")[1]}) 순찰 완료!`);
+  activePatrol=null;
+  showUpcomingPatrols();
+}
+
+
 /* ✅ 초기화 */
-document.addEventListener("DOMContentLoaded",()=>{ document.getElementById("upcomingPanel").addEventListener("click",e=>{ if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden"); }); });
-window.onload = () => { 
-  initMap(); 
-  showUpcomingPatrols(); 
-  setInterval(showUpcomingPatrols, 60000); 
-
-  // ✅ GPS 권한 확인 및 자동완료용 watchPosition 개선
-  if (navigator.geolocation) {
-    navigator.geolocation.watchPosition(
-      pos => {
-        console.log("📍 위치 업데이트:", pos.coords.latitude, pos.coords.longitude);
-        checkProximityAndAutoComplete(pos.coords);
-      },
-      err => {
-        alert("🚫 GPS 오류: " + err.message + "\n브라우저 위치 권한을 허용하세요.");
-      },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-    );
-  } else {
-    alert("❌ 이 브라우저는 GPS를 지원하지 않습니다.");
-  }
-};
-
-
-
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("upcomingPanel").addEventListener("click",e=>{
+    if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
+  });
+});
+window.onload=()=>{initMap();showUpcomingPatrols();setInterval(showUpcomingPatrols,60000);};
 </script>
+
 </body>
-
 </html>
-
-
-
