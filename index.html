@@ -293,10 +293,11 @@ function completePatrol(){
   const logLine = `아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름 || "이름 정보 없음"},  주소: ${data?.주소 || "주소 정보 없음"}\n`;
 
 
-  // ✅ 기존 로그가 있으면 이어붙이기
-  const existingLog = localStorage.getItem("patrol_text_log") || "";
+  // 변경된 부분: 날짜별 키 사용
+  const todayKey = "patrol_text_log_" + new Date().toISOString().slice(0,10);
+  const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
-  localStorage.setItem("patrol_text_log", newLog);
+  localStorage.setItem(todayKey, newLog);
 
   // ✅ 하나의 파일로 다운로드
   const blob = new Blob([newLog], { type: "text/plain" });
@@ -326,4 +327,5 @@ window.onload=()=>{initMap();showUpcomingPatrols();setInterval(showUpcomingPatro
 
 </body>
 </html>
+
 
