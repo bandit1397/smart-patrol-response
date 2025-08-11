@@ -302,16 +302,18 @@ function completePatrol(){
 
 
 /* ✅ 초기화 */
-document.addEventListener("DOMContentLoaded", function() {
-  document.getElementById("categorySelect").addEventListener("change", function() {
-    setActiveCategory(this.value);
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("upcomingPanel").addEventListener("click",e=>{
+    if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
   });
 });
+
 
 window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPatrols,60000); };
 </script>
 
 </body>
 </html>
+
 
 
