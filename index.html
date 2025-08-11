@@ -48,15 +48,19 @@
     #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display: none; }
     #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
   </style>
-  /* ------------------------ ✅ 데이터 정의 ------------------------ */
-  <script src="lampData.js"></script>
-  <script src="patrolSchedule.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key= "></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=&libraries=places"></script>
 </head>
 <body>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
 
 <div id="panel">
+  <!-- ✅ 카테고리 선택 드롭다운 대신 아래처럼 변경 -->
+  <label>순찰카테고리:</label>
+  <ul id="categoryList" style="list-style:none; padding:0; margin:5px auto; max-width:200px; display:flex; justify-content:center; gap:10px;">
+    <li data-cat="안전조치" style="padding:5px 12px; border:1px solid #007bff; border-radius:5px; cursor:pointer; background:#007bff; color:white;">안전조치</li>
+    <li data-cat="특별순찰" style="padding:5px 12px; border:1px solid #007bff; border-radius:5px; cursor:pointer; background:#007bff; color:white;">특별순찰</li>
+  </ul>
+  
   <input type="text" id="keyword" placeholder="키워드를 입력하세요 (예: L0, L003, 범자, 범 피, 전화번호 일부)" />
   <button onclick="searchAndShow()">검색</button>
   <div id="clickedCoords">📍 지도에서 위치를 클릭하면 좌표가 여기에 표시됩니다.</div>
@@ -73,6 +77,64 @@
 <div id="map"></div>
 
 <script>
+ 
+// ② 현재 활성화할 카테고리 (초기값)
+let activeCategories = ["안전조치", "특별순찰"];
+
+// ③ 카테고리 변경 함수
+  function setActiveCategories(selectedCategories) {
+  activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
+  console.log("현재 활성화된 순찰 카테고리:", activeCategories);
+  updatePatrolDisplay();
+}
+
+
+// 🗂 4. 현재 활성 스케줄 가져오기 (기존 함수 대체)
+function getActivePatrolSchedule() {
+  let combined = [];
+  activeCategories.forEach(cat => {
+    if (patrolSchedules[cat]) {
+      combined = combined.concat(patrolSchedules[cat]);
+    }
+  });
+  return combined;
+}
+
+// ⑤ 드롭다운 이벤트 연결
+//  document.getElementById("categorySelect").addEventListener("change", function() {
+//  const selectedOptions = Array.from(this.selectedOptions).map(opt => opt.value);
+//  setActiveCategories(selectedOptions);
+//});
+
+// ⑤ 드롭다운 이벤트 연결
+document.querySelectorAll("#categoryList li").forEach(li => {
+  li.addEventListener("click", () => {
+    const cat = li.getAttribute("data-cat");
+    if (activeCategories.includes(cat)) {
+      // 이미 선택된 카테고리면 해제 (배경색 바꾸기)
+      activeCategories = activeCategories.filter(c => c !== cat);
+      li.style.background = "white";
+      li.style.color = "#007bff";
+      li.style.border = "1px solid #007bff";
+    } else {
+      // 선택 안된 카테고리면 추가
+      activeCategories.push(cat);
+      li.style.background = "#007bff";
+      li.style.color = "white";
+      li.style.border = "1px solid #007bff";
+    }
+    console.log("현재 활성화된 순찰 카테고리:", activeCategories);
+    updatePatrolDisplay();
+  });
+});
+
+
+// 🗂 6. 화면 갱신 함수
+function updatePatrolDisplay() {
+  // 필요하다면 지도 마커를 갱신하도록 확장 가능
+  showUpcomingPatrols();
+}
+
  
 /* ✅ 날짜/시간 유틸 함수 */
 function isWithinDateRange(dateStr,startDateStr,endDateStr){ const d=new Date(dateStr); return d>=new Date(startDateStr)&&d<=new Date(endDateStr); }
@@ -99,6 +161,8 @@ function showUpcomingPatrols(){
   const list=document.getElementById("upcomingList");
   list.innerHTML="";
   const upcoming=[];
+
+  const patrolSchedule = getActivePatrolSchedule();
 
   patrolSchedule.forEach(task=>{
     if(!isWithinDateRange(now.toISOString().slice(0,10),task.startDate,task.endDate)) return;
@@ -211,7 +275,7 @@ function completePatrol(){
   const logLine = `아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름 || "이름 정보 없음"},  주소: ${data?.주소 || "주소 정보 없음"}\n`;
 
 
-  // 변경된 부분: 날짜별 키 사용
+ // 변경된 부분: 날짜별 키 사용
   const todayKey = "patrol_text_log_" + new Date().toISOString().slice(0,10);
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
@@ -235,18 +299,14 @@ function completePatrol(){
 
 
 /* ✅ 초기화 */
-document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("upcomingPanel").addEventListener("click",e=>{
-    if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("categorySelect").addEventListener("change", function() {
+    setActiveCategory(this.value);
   });
 });
-window.onload=()=>{initMap();showUpcomingPatrols();setInterval(showUpcomingPatrols,60000);};
+
+window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPatrols,60000); };
 </script>
 
 </body>
 </html>
-
-
-
-
-
