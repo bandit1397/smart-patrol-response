@@ -48,6 +48,9 @@
     #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display: none; }
     #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
   </style>
+  /* ------------------------ ✅ 데이터 정의 ------------------------ */
+  <script src="lampData.js"></script>
+  <script src="patrolSchedule.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=&libraries=places"></script>
 </head>
 <body>
@@ -310,3 +313,4 @@ window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPa
 
 </body>
 </html>
+
