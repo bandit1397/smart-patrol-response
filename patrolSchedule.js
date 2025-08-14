@@ -27,7 +27,4 @@ const patrolSchedules = {
   { id:"CV13(41호)", startDate:"2025-07-31", endDate:"2025-08-30", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"05:00", end:"06:00" },{ start:"19:00", end:"20:00" }] },
 
   ],
-  특별순찰: [
-    { id:"SP1(41호)", startDate:"2025-08-10", endDate:"2025-08-31", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"10:00", end:"12:00" },{ start:"16:00", end:"18:00" },{ start:"20:00", end:"22:00" }] },
-  ]
 };
