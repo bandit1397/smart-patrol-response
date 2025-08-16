@@ -8,8 +8,6 @@ const patrolSchedules = {
 
   { id:"CV4(41호)", startDate:"2025-05-22", endDate:"2025-08-21", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"13:00", end:"14:00" },{ start:"22:00", end:"23:00" }] },
 
-  { id:"CV5(42호)", startDate:"2025-04-15", endDate:"2025-08-14", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"12:00", end:"13:00" }] },
-
   { id:"CV6(43호)", startDate:"2025-06-08", endDate:"2025-09-07", daysOfWeek:[1,2,3,4,5], timeRanges:[{ start:"08:00", end:"09:00" },{ start:"22:00", end:"23:00" }] },
 
   { id:"CV7(43호)", startDate:"2025-05-23", endDate:"2025-08-22", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"23:00", end:"00:00" }] },
