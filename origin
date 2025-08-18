@@ -1,0 +1,24 @@
+/* ✅ 검색 */
+function searchAndShow(){
+  const kw=document.getElementById("keyword").value.trim();
+  if(!kw){ alert("⚠️ 키워드 입력하세요."); return; }
+  clearMarkers();
+  const kwNoSpace=kw.replace(/\s+/g,"").toLowerCase();
+  if(kwNoSpace.length<2){ alert("⚠️ 최소 2글자 이상 입력"); return; }
+
+  const res=Object.keys(lampData).filter(id=>{
+    const d=lampData[id];
+    const name=normalizeText(d.고유이름);
+    if(name===kwNoSpace) return true;
+    if(/^l\d+$/i.test(d.고유이름)&&d.고유이름.toLowerCase().endsWith(kwNoSpace)) return true;
+    if(isSequenceMatch(name,kwNoSpace)) return true;
+    if(normalizeText(d.전화번호).includes(kwNoSpace)) return true;
+    if([d.주소,d.분류,d.특이사항].some(f=>isSequenceMatch(normalizeText(f),kwNoSpace))) return true;
+    return false;
+  }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
+
+  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
+  const bounds=new google.maps.LatLngBounds();
+  res.forEach(r=>{addMarker(r.id,r.pos,"blue");bounds.extend(r.pos);});
+  map.fitBounds(bounds);
+}
