@@ -236,27 +236,62 @@ function addMarker(id,pos,color){
 }
 
 /* ✅ 검색 */
-function searchAndShow(){
-  const kw=document.getElementById("keyword").value.trim();
-  if(!kw){ alert("⚠️ 키워드 입력하세요."); return; }
+function searchAndShow() {
+  const kw = document.getElementById("keyword").value.trim();
+  if (!kw) {
+    alert("⚠️ 키워드 입력하세요.");
+    return;
+  }
+
   clearMarkers();
-  const kwNoSpace=kw.replace(/\s+/g,"").toLowerCase();
-  if(kwNoSpace.length<2){ alert("⚠️ 최소 2글자 이상 입력"); return; }
 
-  const res=Object.keys(lampData).filter(id=>{
-    const d=lampData[id];
-    const name=normalizeText(d.고유이름);
-    if(name===kwNoSpace) return true;
-    if(/^l\d+$/i.test(d.고유이름)&&d.고유이름.toLowerCase().endsWith(kwNoSpace)) return true;
-    if(isSequenceMatch(name,kwNoSpace)) return true;
-    if(normalizeText(d.전화번호).includes(kwNoSpace)) return true;
-    if([d.주소,d.분류,d.특이사항].some(f=>isSequenceMatch(normalizeText(f),kwNoSpace))) return true;
-    return false;
-  }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
+  const kwLower = kw.toLowerCase().replace(/\s+/g, ""); // 공백 제거
+  if (kwLower.length < 2) {
+    alert("⚠️ 최소 2글자 이상 입력");
+    return;
+  }
 
-  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
-  const bounds=new google.maps.LatLngBounds();
-  res.forEach(r=>{addMarker(r.id,r.pos,"blue");bounds.extend(r.pos);});
+  const normalizeSimple = str => (str || "").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g, "");
+
+  const kwNormalized = normalizeSimple(kwLower);
+
+  const res = Object.keys(lampData).filter(id => {
+    const d = lampData[id];
+
+    const fields = [
+      d.고유이름,
+      d.전화번호,
+      d.주소,
+      d.분류,
+      d.특이사항
+    ];
+
+    return fields.some(field => {
+      const text = (field || "").toLowerCase();
+      const textNorm = normalizeSimple(text);
+
+      return (
+        text.includes(kwLower) ||                      // ✅ 특수문자 포함한 사용자 입력 그대로 포함
+        textNorm.includes(kwNormalized) ||             // ✅ 정규화 후 포함
+        isSequenceMatch(text, kwLower) ||              // ✅ 순서 일치 검색
+        isSequenceMatch(textNorm, kwNormalized)        // ✅ 정규화 + 순서 일치 검색
+      );
+    });
+  }).map(id => ({
+    id,
+    pos: parseCoords(lampData[id].좌표)
+  }));
+
+  if (res.length === 0) {
+    alert("❌ 검색 결과 없음");
+    return;
+  }
+
+  const bounds = new google.maps.LatLngBounds();
+  res.forEach(r => {
+    addMarker(r.id, r.pos, "blue");
+    bounds.extend(r.pos);
+  });
   map.fitBounds(bounds);
 }
 
@@ -315,6 +350,7 @@ window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPa
 
 </body>
 </html>
+
 
 
 
