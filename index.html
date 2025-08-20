@@ -66,10 +66,17 @@
   
   <input type="text" id="keyword" placeholder="키워드를 입력하세요 (예: L0, L003, 범자, 범 피, 전화번호 일부)" />
   <button onclick="searchAndShow()">검색</button>
-  <div id="clickedCoords">📍 지도에서 위치를 클릭하면 좌표가 여기에 표시됩니다.</div>
-  <button id="copyBtn" onclick="copyCoords()">좌표 복사</button>
+  <div style="display:flex; align-items:center; justify-content:center; gap:5px; max-width:350px; margin:5px auto;">
+  <div id="clickedCoords" style="flex:1; padding:8px; border:1px solid #007bff; background:#eef6ff; font-size:14px; border-radius:5px; text-align:center;">
+    📍 
+  </div>
+  <button id="copyRouteBtn" style="padding:6px 8px; font-size:12px; background:#ff9800; color:white; border:none; border-radius:5px; cursor:pointer;">
+    📋 위치 url 복사
+  </button>
+  </div>
   <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
   <button id="navigateBtn" onclick="navigateToPatrol()">📍 Google Maps 길찾기</button>
+  
 </div>
 
 <div id="upcomingPanel">
@@ -206,15 +213,36 @@ function showUpcomingPatrols(){
 }
 
 /* ------------------------ ✅ 지도 기능 ------------------------ */
-function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.3857,lng:126.6586},zoom:15});
-  infoWindow=new google.maps.InfoWindow();
-  map.addListener("click",e=>{
-    lastClickedCoord=`${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
-    document.getElementById("clickedCoords").innerText=`📍 클릭 좌표: ${lastClickedCoord}`;
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 37.3857, lng: 126.6586 },
+    zoom: 15
+  });
+  infoWindow = new google.maps.InfoWindow();
+
+  map.addListener("click", e => {
+    // 클릭 좌표 저장
+    lastClickedCoord = `${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
+    document.getElementById("clickedCoords").innerText = `📍 클릭 좌표: ${lastClickedCoord}`;
+
+    // 기존 클릭 마커가 있으면 제거
+    if (window.lastClickMarker) {
+      window.lastClickMarker.setMap(null);
+    }
+
+    // 클릭한 위치에 새 마커 생성
+    window.lastClickMarker = new google.maps.Marker({
+      position: e.latLng,
+      map: map,
+      icon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png", // 오렌지색 마커
+      title: "선택한 위치"
+    });
   });
 }
-function copyCoords(){ if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하세요."); return; } navigator.clipboard.writeText(lastClickedCoord).then(()=>alert("✅ 복사됨: "+lastClickedCoord)); }
+
+
+
+//function copyCoords(){ if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하세요."); return; } navigator.clipboard.writeText(lastClickedCoord).then(()=>alert("✅ 복사됨: "+lastClickedCoord)); }
 function clearMarkers(){ markers.forEach(m=>m.setMap(null)); markers=[]; }
 function addMarker(id,pos,color){
   const m=new google.maps.Marker({position:pos,map,label:id,icon:{url:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`}});
@@ -234,6 +262,22 @@ function addMarker(id,pos,color){
   m.addListener("dblclick",()=>{const c=lampData[id].좌표.split(",");window.open(`https://www.google.com/maps/dir/?api=1&destination=${c[0]},${c[1]}`,"_blank");});
   markers.push(m);
 }
+/* ------------------- 구글 길찾기 URL 복사 버튼 이벤트 ------------------- */
+document.getElementById("copyRouteBtn").addEventListener("click", () => {
+  if (!lastClickedCoord) {
+    alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요.");
+    return;
+  }
+
+  const [lat, lng] = lastClickedCoord.split(",");
+  const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+
+  navigator.clipboard.writeText(gmapsUrl).then(() => {
+    alert(`✅ Google Maps 길찾기 URL이 복사되었습니다:\n${gmapsUrl}\n\n이제 카카오톡으로 공유할 수 있습니다.`);
+  }).catch(err => {
+    alert("⚠️ URL 복사 실패: " + err);
+  });
+});
 
 /* ✅ 검색 */
 function searchAndShow() {
@@ -350,13 +394,3 @@ window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPa
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
