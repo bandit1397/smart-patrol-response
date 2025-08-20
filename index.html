@@ -206,6 +206,10 @@ function showUpcomingPatrols(){
 }
 
 /* ------------------------ ✅ 지도 기능 ------------------------ */
+let map, infoWindow;
+let lastClickedCoord = null;
+let markers = [];
+
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 37.3857, lng: 126.6586 },
@@ -213,6 +217,7 @@ function initMap() {
   });
   infoWindow = new google.maps.InfoWindow();
 
+  // 지도 빈 곳 클릭 시 동작
   map.addListener("click", e => {
     // 1) 클릭 좌표 저장
     lastClickedCoord = `${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
@@ -237,6 +242,7 @@ function initMap() {
   });
 }
 
+// 좌표 복사 버튼용
 function copyCoords() {
   if (!lastClickedCoord) {
     alert("⚠️ 먼저 지도를 클릭하세요.");
@@ -248,11 +254,13 @@ function copyCoords() {
     .then(() => alert("✅ 복사됨: " + shareLink));
 }
 
+// 마커 초기화
 function clearMarkers() {
   markers.forEach(m => m.setMap(null));
   markers = [];
 }
 
+// 마커 추가
 function addMarker(id, pos, color) {
   const m = new google.maps.Marker({
     position: pos,
@@ -262,6 +270,33 @@ function addMarker(id, pos, color) {
       url: `http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`
     }
   });
+
+  // lampData에 정의된 마커일 경우만 상세정보/길찾기 이벤트 부여
+  if (typeof lampData !== "undefined" && lampData[id]) {
+    m.addListener("click", () => {
+      const data = lampData[id];
+      infoWindow.setContent(`
+        <div style="min-width:150px;">
+          <strong>${data.고유이름}</strong><br/>
+          <b>분류:</b> ${data.분류}<br/>
+          <b>전화번호:</b> ${data.전화번호}<br/>
+          <b>주소:</b> ${data.주소}<br/>
+          <b>특이사항:</b> ${data.특이사항}
+        </div>
+      `);
+      infoWindow.open(map, m);
+    });
+
+    // lampData 마커 더블클릭 시 → 구글지도 길찾기 열기
+    m.addListener("dblclick", () => {
+      const c = lampData[id].좌표.split(",");
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${c[0]},${c[1]}`,
+        "_blank"
+      );
+    });
+  }
+
   markers.push(m);
 }
 /* ✅ 검색 */
@@ -379,6 +414,7 @@ window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPa
 
 </body>
 </html>
+
 
 
 
