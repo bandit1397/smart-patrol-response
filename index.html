@@ -397,10 +397,16 @@ function completePatrol(){
 
   // ✅ 하나의 파일로 다운로드
   const blob = new Blob([newLog], { type: "text/plain" });
+
+  // 파일명에 시간까지 포함 → 브라우저 묻지 않음
+  const now = new Date();
+  const fileName = `patrol_log_${now.toISOString().slice(0,10)}_${now.getHours()}${now.getMinutes()}${now.getSeconds()}.txt`;
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "patrol_log.txt";
+  a.download = fileName; // 기존 patrol_log.txt 대신 고유 파일명
+  a.style.display = "none";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
