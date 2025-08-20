@@ -65,7 +65,16 @@
   </ul>
   
   <input type="text" id="keyword" placeholder="키워드를 입력하세요 (예: L0, L003, 범자, 범 피, 전화번호 일부)" />
-  <button onclick="searchAndShow()">검색</button>
+  <div style="display:flex; justify-content:center; gap:5px; max-width:350px; margin:5px auto;">
+  <button onclick="searchAndShow()" 
+    style="flex:1; padding:6px 8px; font-size:14px; border:1px solid #007bff; background:#007bff; color:white; border-radius:5px; cursor:pointer;">
+    검색
+  </button>
+  <button onclick="resetSearch()" 
+    style="flex:1; padding:6px 8px; font-size:14px; border:1px solid #6c757d; background:#6c757d; color:white; border-radius:5px; cursor:pointer;">
+    초기화
+  </button>
+  </div>
   <div style="display:flex; align-items:center; justify-content:center; gap:5px; max-width:350px; margin:5px auto;">
   <div id="clickedCoords" style="flex:1; padding:8px; border:1px solid #007bff; background:#eef6ff; font-size:14px; border-radius:5px; text-align:center;">
     📍 
@@ -74,8 +83,16 @@
     📋 위치 url 복사
   </button>
   </div>
-  <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
-  <button id="navigateBtn" onclick="navigateToPatrol()">📍 Google Maps 길찾기</button>
+  <div style="display:flex; justify-content:center; gap:10px; max-width:350px; margin:10px auto;">
+  <button id="completeBtn" onclick="completePatrol()" 
+          style="flex:1; padding:6px; font-size:14px; border-radius:5px; background:#28a745; color:white; border:none; cursor:pointer;">
+    ✅ 순찰 완료
+  </button>
+  <button id="navigateBtn" onclick="navigateToPatrol()" 
+          style="flex:1; padding:6px; font-size:14px; border-radius:5px; background:#007bff; color:white; border:none; cursor:pointer;">
+    📍 길찾기
+  </button>
+  </div>
   
 </div>
 
@@ -164,7 +181,8 @@ let completedPatrols = loadCompletedPatrols();
 /* ✅ 상태 변수 */
 let activePatrol = null;
 let lastClickedCoord = "";
-let map, markers=[], infoWindow;
+let map, markers = [], infoWindow;
+let searchMode = false;   // 🔹 검색 모드 여부
 
 /* ✅ 순찰 리스트 표시 */
 function showUpcomingPatrols(){
@@ -221,11 +239,13 @@ function initMap() {
   infoWindow = new google.maps.InfoWindow();
 
   map.addListener("click", e => {
+    if (searchMode) return; // 🔹 검색 모드일 때는 클릭 마커 생성 안 함
+
     // 클릭 좌표 저장
     lastClickedCoord = `${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
     document.getElementById("clickedCoords").innerText = `📍 클릭 좌표: ${lastClickedCoord}`;
 
-    // 기존 클릭 마커가 있으면 제거
+    // 기존 클릭 마커 제거
     if (window.lastClickMarker) {
       window.lastClickMarker.setMap(null);
     }
@@ -234,7 +254,7 @@ function initMap() {
     window.lastClickMarker = new google.maps.Marker({
       position: e.latLng,
       map: map,
-      icon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png", // 오렌지색 마커
+      icon: "http://maps.google.com/mapfiles/ms/icons/orange-dot.png",
       title: "선택한 위치"
     });
   });
@@ -287,44 +307,32 @@ function searchAndShow() {
     return;
   }
 
+  searchMode = true; // 🔹 검색 모드 활성화
   clearMarkers();
 
-  const kwLower = kw.toLowerCase().replace(/\s+/g, ""); // 공백 제거
+  const kwLower = kw.toLowerCase().replace(/\s+/g, "");
   if (kwLower.length < 2) {
     alert("⚠️ 최소 2글자 이상 입력");
     return;
   }
 
   const normalizeSimple = str => (str || "").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g, "");
-
   const kwNormalized = normalizeSimple(kwLower);
 
   const res = Object.keys(lampData).filter(id => {
     const d = lampData[id];
-
-    const fields = [
-      d.고유이름,
-      d.전화번호,
-      d.주소,
-      d.분류,
-      d.특이사항
-    ];
-
+    const fields = [d.고유이름, d.전화번호, d.주소, d.분류, d.특이사항];
     return fields.some(field => {
       const text = (field || "").toLowerCase();
       const textNorm = normalizeSimple(text);
-
       return (
-        text.includes(kwLower) ||                      // ✅ 특수문자 포함한 사용자 입력 그대로 포함
-        textNorm.includes(kwNormalized) ||             // ✅ 정규화 후 포함
-        isSequenceMatch(text, kwLower) ||              // ✅ 순서 일치 검색
-        isSequenceMatch(textNorm, kwNormalized)        // ✅ 정규화 + 순서 일치 검색
+        text.includes(kwLower) ||
+        textNorm.includes(kwNormalized) ||
+        isSequenceMatch(text, kwLower) ||
+        isSequenceMatch(textNorm, kwNormalized)
       );
     });
-  }).map(id => ({
-    id,
-    pos: parseCoords(lampData[id].좌표)
-  }));
+  }).map(id => ({ id, pos: parseCoords(lampData[id].좌표) }));
 
   if (res.length === 0) {
     alert("❌ 검색 결과 없음");
@@ -337,6 +345,29 @@ function searchAndShow() {
     bounds.extend(r.pos);
   });
   map.fitBounds(bounds);
+}
+
+/* ✅ 검색 초기화 */
+function resetSearch() {
+  searchMode = false; // 🔹 검색 모드 해제
+  clearMarkers();
+
+  // 🔹 키워드 입력창 초기화
+  document.getElementById("keyword").value = "";
+
+  // 클릭 좌표 초기화
+  lastClickedCoord = "";
+  document.getElementById("clickedCoords").innerText = "📍";
+
+  // 기존 클릭 마커 제거
+  if (window.lastClickMarker) {
+    window.lastClickMarker.setMap(null);
+    window.lastClickMarker = null;
+  }
+
+  // 지도 원래 중심/줌으로 복귀
+  map.setCenter({ lat: 37.3857, lng: 126.6586 });
+  map.setZoom(15);
 }
 
 /* ✅ 길찾기 버튼 */
