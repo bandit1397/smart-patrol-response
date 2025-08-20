@@ -147,3 +147,19 @@ function addMarker(id, pos, color) {
 
   markers.push(m);
 }
+
+ // ✅ 하나의 파일로 다운로드
+  const blob = new Blob([newLog], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "patrol_log.txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  alert(`✅ ${activePatrol.task.id} (${activePatrol.key.split("|")[1]}) 순찰 완료!`);
+  activePatrol=null;
+  showUpcomingPatrols();
+}
