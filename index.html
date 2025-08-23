@@ -192,50 +192,27 @@ document.getElementById("copyRouteBtn").addEventListener("click",()=>{
     .catch(()=>alert("❌ 클립보드 복사 실패"));
 });
 
-function searchAndShow() {
-  const kw = document.getElementById("keyword").value.trim();
-  if (!kw) {
-    alert("⚠️ 키워드 입력하세요.");
-    return;
-  }
-
-  searchMode = true; // 🔹 검색 모드 활성화
+function searchAndShow(){
+  const kw=document.getElementById("keyword").value.trim();
+  if(!kw){ alert("⚠️ 키워드 입력하세요."); return; }
+  searchMode = true;
   clearMarkers();
-
-  const kwLower = kw.toLowerCase().replace(/\s+/g, "");
-  if (kwLower.length < 2) {
-    alert("⚠️ 최소 2글자 이상 입력");
-    return;
-  }
-
-  const normalizeSimple = str => (str || "").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g, "");
+  const kwLower = kw.toLowerCase().replace(/\s+/g,"");
+  if(kwLower.length<2){ alert("⚠️ 최소 2글자 이상 입력"); return; }
+  const normalizeSimple = str => (str||"").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g,"");
   const kwNormalized = normalizeSimple(kwLower);
-
-  const res = Object.keys(lampData).filter(id => {
-    const d = lampData[id];
-    const fields = [d.고유이름, d.전화번호, d.주소, d.분류, d.특이사항];
-    return fields.some(field => {
-      const text = (field || "").toLowerCase();
-      const textNorm = normalizeSimple(text);
-      return (
-        text.includes(kwLower) ||
-        textNorm.includes(kwNormalized) ||
-        isSequenceMatch(text, kwLower) ||
-        isSequenceMatch(textNorm, kwNormalized)
-      );
+  const res = Object.keys(lampData).filter(id=>{
+    const d=lampData[id];
+    const fields=[d.고유이름,d.전화번호,d.주소,d.분류,d.특이사항];
+    return fields.some(field=>{
+      const text=(field||"").toLowerCase();
+      const textNorm=normalizeSimple(text);
+      return text.includes(kwLower) || textNorm.includes(kwNormalized);
     });
-  }).map(id => ({ id, pos: parseCoords(lampData[id].좌표) }));
-
-  if (res.length === 0) {
-    alert("❌ 검색 결과 없음");
-    return;
-  }
-
-  const bounds = new google.maps.LatLngBounds();
-  res.forEach(r => {
-    addMarker(r.id, r.pos, "blue");
-    bounds.extend(r.pos);
-  });
+  }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
+  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
+  const bounds=new google.maps.LatLngBounds();
+  res.forEach(r=>{ addMarker(r.id,r.pos,"blue"); bounds.extend(r.pos); });
   map.fitBounds(bounds);
 }
 
@@ -294,4 +271,5 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
 
