@@ -151,16 +151,34 @@ function initMap(){
 }
 
 function clearMarkers(){ markers.forEach(m=>m.setMap(null)); markers=[]; }
-function addMarker(id,pos,color){
-  const m=new google.maps.Marker({position:pos,map,label:id,icon:{url:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`}});
-  m.addListener("click",()=>{
+function addMarker(id, pos, color){
+  const m = new google.maps.Marker({
+    position: pos,
+    map: map,
+    label: id,
+    icon: { url: `http://maps.google.com/mapfiles/ms/icons/${color}-dot.png` }
+  });
+
+  m.addListener("click", () => {
+    // infoWindow 열기
     const data = lampData[id];
     infoWindow.setContent(`<div style="min-width:150px;"><strong>${data.고유이름}</strong><br/><b>분류:</b> ${data.분류}<br/><b>전화번호:</b> ${data.전화번호}<br/><b>주소:</b> ${data.주소}<br/><b>특이사항:</b> ${data.특이사항}</div>`);
     infoWindow.open(map, m);
-    // 클릭하면 길찾기 버튼 사용 가능하도록 좌표 지정
+
+    // 클릭하면 마커 색상 변경
+    m.setIcon(`http://maps.google.com/mapfiles/ms/icons/red-dot.png`);
+
+    // 이전에 클릭된 마커가 있으면 원래 색으로 되돌리기
+    if(window.lastClickedSearchMarker && window.lastClickedSearchMarker !== m){
+      window.lastClickedSearchMarker.setIcon(`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`);
+    }
+    window.lastClickedSearchMarker = m;
+
+    // 클릭 좌표 저장
     lastClickedCoord = data.좌표;
     document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
   });
+
   markers.push(m);
 }
 
