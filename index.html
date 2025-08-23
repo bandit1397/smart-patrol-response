@@ -198,13 +198,11 @@ function searchAndShow() {
   searchMode = true;
   clearMarkers();
 
-  // 입력값 정규화: 소문자 + 공백, 특수문자 제거
   const normalizeSimple = str => (str || "").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g, "");
-
   const kwNormalized = normalizeSimple(kw);
   if (kwNormalized.length < 2) { alert("⚠️ 최소 2글자 이상 입력"); return; }
 
-  // **핵심: 입력 글자를 하나씩 나눠서 .* 넣기 → '안천' → /안.*천/
+  // 핵심: 입력 글자마다 .* 삽입 → '안천' => /안.*천/
   const kwRegex = new RegExp(kwNormalized.split("").join(".*"), "i");
 
   const res = Object.keys(lampData).filter(id => {
@@ -212,11 +210,10 @@ function searchAndShow() {
     const fields = [d.고유이름, d.전화번호, d.주소, d.분류, d.특이사항];
 
     return fields.some(field => {
-      const text = (field || "");
-      const textNorm = normalizeSimple(text);
+      const textNorm = normalizeSimple(field || "");
       return (
-        kwRegex.test(textNorm) ||  // '안천' → '안양천' 매칭
-        textNorm.includes(kwNormalized) // 단순 포함 체크
+        kwRegex.test(textNorm) ||         // 정규식 매칭 (중간 글자 허용)
+        textNorm.includes(kwNormalized)   // 단순 포함
       );
     });
   }).map(id => ({ id, pos: parseCoords(lampData[id].좌표) }));
@@ -282,6 +279,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
 
 
 
