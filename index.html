@@ -2,26 +2,26 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>특정 poi 기반 출동/순찰 시스템 (Leaflet)</title>
+<title>출동/순찰 시스템 (Leaflet 마커 클릭 색상)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <style>
-  html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-  #map { height: 100%; width: 100%; }
-  #panel { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #fff; padding: 10px; border-radius: 5px; max-width: 400px; width: 90%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
-  #panel input, #panel button { width: 100%; margin: 5px 0; padding: 8px; font-size: 14px; border-radius: 4px; border: 1px solid #007bff; }
-  #panel button { cursor: pointer; color: #fff; background: #007bff; border: none; }
-  #clickedCoords { background:#eef6ff; border:1px solid #007bff; text-align:center; padding:6px; border-radius:4px; font-size:13px; }
-  #upcomingPanel { position: fixed; top: 10px; right: 10px; width: 250px; max-height: 60vh; overflow-y:auto; background: rgba(255,255,255,0.95); border:1px solid #007bff; border-radius:5px; padding:10px; font-size:14px; z-index:1000; box-shadow:2px 2px 5px rgba(0,0,0,0.2); cursor:pointer; }
-  #upcomingPanel h4 { margin:0 0 5px; color:#007bff; font-size:16px; }
-  #upcomingList { list-style:none; margin:0; padding:0; }
-  #upcomingList li { padding:5px 8px; border-bottom:1px solid #ddd; cursor:pointer; border-radius:3px; user-select:none; }
-  #upcomingList li:hover { background:#eef6ff; }
-  #upcomingPanel.hidden { width:50px; height:40px; padding:5px; overflow:hidden; cursor:pointer; }
-  #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display:none; }
-  #upcomingPanel.hidden::after { content:"⏰"; position:absolute; top:10px; left:15px; font-size:20px; color:#007bff; }
+html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+#map { height: 100%; width: 100%; }
+#panel { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 1000; background: #fff; padding: 10px; border-radius: 5px; max-width: 400px; width: 90%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+#panel input, #panel button { width: 100%; margin: 5px 0; padding: 8px; font-size: 14px; border-radius: 4px; border: 1px solid #007bff; }
+#panel button { cursor: pointer; color: #fff; background: #007bff; border: none; }
+#clickedCoords { background:#eef6ff; border:1px solid #007bff; text-align:center; padding:6px; border-radius:4px; font-size:13px; }
+#upcomingPanel { position: fixed; top: 10px; right: 10px; width: 250px; max-height: 60vh; overflow-y:auto; background: rgba(255,255,255,0.95); border:1px solid #007bff; border-radius:5px; padding:10px; font-size:14px; z-index:1000; box-shadow:2px 2px 5px rgba(0,0,0,0.2); cursor:pointer; }
+#upcomingPanel h4 { margin:0 0 5px; color:#007bff; font-size:16px; }
+#upcomingList { list-style:none; margin:0; padding:0; }
+#upcomingList li { padding:5px 8px; border-bottom:1px solid #ddd; cursor:pointer; border-radius:3px; user-select:none; }
+#upcomingList li:hover { background:#eef6ff; }
+#upcomingPanel.hidden { width:50px; height:40px; padding:5px; overflow:hidden; cursor:pointer; }
+#upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display:none; }
+#upcomingPanel.hidden::after { content:"⏰"; position:absolute; top:10px; left:15px; font-size:20px; color:#007bff; }
 </style>
 </head>
 <body>
@@ -67,21 +67,28 @@ let lastClickedCoord = "";
 let activeCategories = ["안전조치"];
 let activePatrol = null;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
+let selectedMarker = null; // 클릭된 마커 저장
 
 function parseCoords(s){ const [lat,lng]=s.split(",").map(Number); return [lat,lng]; }
 function pad(n){ return n.toString().padStart(2,"0"); }
 
 function addMarker(id, pos, color="blue") {
-  const m = L.marker(pos, {title:id, icon: L.icon({iconUrl:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`, iconSize:[32,32], iconAnchor:[16,32]})});
+  const icon = L.icon({iconUrl:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`, iconSize:[32,32], iconAnchor:[16,32]});
+  const m = L.marker(pos, {title:id, icon: icon});
   m.on('click', ()=>{
     const data=lampData[id];
     lastClickedCoord=data.좌표;
     document.getElementById("clickedCoords").innerText=`📍 선택: ${lastClickedCoord}`;
+
+    // 마커 색상 변경
+    if(selectedMarker) selectedMarker.setIcon(L.icon({iconUrl:`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`, iconSize:[32,32], iconAnchor:[16,32]}));
+    m.setIcon(L.icon({iconUrl:`http://maps.google.com/mapfiles/ms/icons/red-dot.png`, iconSize:[32,32], iconAnchor:[16,32]}));
+    selectedMarker = m;
   });
   markers.addLayer(m);
 }
 
-function clearMarkers(){ markers.clearLayers(); }
+function clearMarkers(){ markers.clearLayers(); selectedMarker=null; }
 
 function searchAndShow() {
   const kw=document.getElementById("keyword").value.trim();
