@@ -71,6 +71,7 @@ let activeCategories = ["안전조치"];
 let activePatrol = null;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let selectedMarker = null; // 클릭된 마커 저장
+let clickMarker = null; // 지도 클릭으로 생성되는 마커 저장
 
 function parseCoords(s){ const [lat,lng]=s.split(",").map(Number); return [lat,lng]; }
 function pad(n){ return n.toString().padStart(2,"0"); }
@@ -163,6 +164,18 @@ map.on('click', function(e){
   const lng = e.latlng.lng.toFixed(6);
   lastClickedCoord = `${lat},${lng}`;
   document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
+
+  // 기존 클릭 마커 제거
+  if(clickMarker) map.removeLayer(clickMarker);
+
+  // 새로운 마커 추가
+  clickMarker = L.marker([lat,lng], {
+    icon: L.icon({
+      iconUrl: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+      iconSize: [32,32],
+      iconAnchor: [16,32]
+    })
+  }).addTo(map);
 });
 
 function navigateToPatrol(){
@@ -281,4 +294,5 @@ showUpcomingPatrols();
 
 </body>
 </html>
+
 
