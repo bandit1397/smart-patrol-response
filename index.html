@@ -198,10 +198,16 @@ function shareKakaoLink(){
   if(!lastClickedCoord){ alert("⚠️ 먼저 좌표 선택"); return; }
   const [lat,lng] = lastClickedCoord.split(",");
   const url = `https://map.kakao.com/link/map/선택위치,${lat},${lng}`;
+
   if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
     window.open(`kakaotalk://send?text=${encodeURIComponent(url)}`, "_blank");
   } else {
-    prompt("카카오톡 공유용 URL:", url);
+    // URL 자동 복사
+    navigator.clipboard.writeText(url).then(() => {
+      alert("✅ URL이 복사되었습니다!");  // 이전 prompt 대신 복사 알림
+    }).catch(() => {
+      prompt("복사 실패! 수동 복사하세요:", url);
+    });
   }
 }
 
@@ -294,5 +300,6 @@ showUpcomingPatrols();
 
 </body>
 </html>
+
 
 
