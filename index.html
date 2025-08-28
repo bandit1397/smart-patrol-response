@@ -70,6 +70,7 @@ let lastClickedCoord = "";
 let map, markers = [], markerCluster;
 let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
+let lastClickedMarker = null;
 
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
@@ -154,12 +155,33 @@ function initMap(){
 function clearMarkers(){ markerCluster.clearLayers(); markers=[]; }
 
 function addMarker(id, pos, color){
-  const m = L.marker([pos.lat,pos.lng], { icon: L.icon({iconUrl:`https://maps.google.com/mapfiles/ms/icons/${color}-dot.png`, iconSize:[32,32]}) });
+  const defaultIcon = L.icon({
+    iconUrl: `https://maps.google.com/mapfiles/ms/icons/${color}-dot.png`,
+    iconSize: [32, 32]
+  });
+  const clickedIcon = L.icon({
+    iconUrl: `https://maps.google.com/mapfiles/ms/icons/red-dot.png`,
+    iconSize: [32, 32]
+  });
+
+  const m = L.marker([pos.lat, pos.lng], { icon: defaultIcon });
   m.bindPopup(`<strong>${lampData[id].고유이름}</strong><br/><b>분류:</b> ${lampData[id].분류}<br/><b>전화번호:</b> ${lampData[id].전화번호}<br/><b>주소:</b> ${lampData[id].주소}<br/><b>특이사항:</b> ${lampData[id].특이사항}`);
-  m.on("click", ()=>{
+
+  m.on("click", () => {
+    // 클릭된 마커 색상 변경
+    m.setIcon(clickedIcon);
+
+    // 이전 클릭 마커가 있으면 원래 색으로 복원
+    if (lastClickedMarker && lastClickedMarker !== m) {
+      lastClickedMarker.setIcon(defaultIcon);
+    }
+    lastClickedMarker = m;
+
+    // 클릭 좌표 업데이트
     lastClickedCoord = lampData[id].좌표;
     document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
   });
+
   markerCluster.addLayer(m);
   markers.push(m);
 }
@@ -247,3 +269,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
