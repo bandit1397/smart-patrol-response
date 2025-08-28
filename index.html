@@ -1,8 +1,10 @@
+100% 그대로 유지한 통합 HTML입니다.
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<title>출동/순찰 시스템 (Leaflet 마커 클릭 색상)</title>
+<title>출동/순찰 시스템 (Leaflet 마커 클릭 색상 + 지도 클릭 좌표)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
@@ -41,6 +43,7 @@ html, body { height: 100%; margin: 0; padding: 0; font-family: Arial, sans-serif
   <div style="display:flex; gap:5px; margin-top:5px;">
     <button onclick="completePatrol()" style="flex:1; background:#28a745;">✅ 순찰 완료</button>
     <button onclick="navigateToPatrol()" style="flex:1;">📍 길찾기</button>
+    <button onclick="shareKakaoLink()" style="flex:1; background:#ff9900;">💬 카톡 공유</button>
   </div>
 </div>
 
@@ -81,12 +84,11 @@ function addMarker(id, pos, color="blue") {
 
   const m = L.marker(pos, {title:id, icon: icon});
 
-  m.on('click', ()=>{
-    const data = lampData[id]; // lampData[id] 객체 가져오기
+  m.on('click', ()=> {
+    const data = lampData[id];
     lastClickedCoord = data.좌표;
     document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
 
-    // 마커 색상 변경
     if(selectedMarker) {
       selectedMarker.setIcon(L.icon({
         iconUrl:`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`,
@@ -101,7 +103,6 @@ function addMarker(id, pos, color="blue") {
     }));
     selectedMarker = m;
 
-    // 팝업 내용 생성
     const popupContent = `
       <div style="min-width:150px;">
         <strong>분류:</strong> ${data.분류 || ""}<br/>
@@ -147,7 +148,22 @@ function searchAndShow() {
   map.fitBounds(group.getBounds().pad(0.2));
 }
 
-function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; map.setView([37.3857,126.6586],15); }
+function resetSearch(){ 
+  searchMode=false; 
+  clearMarkers(); 
+  document.getElementById("keyword").value=""; 
+  lastClickedCoord=""; 
+  document.getElementById("clickedCoords").innerText="📍"; 
+  map.setView([37.3857,126.6586],15); 
+}
+
+// 지도 클릭 시 좌표 표시
+map.on('click', function(e){
+  const lat = e.latlng.lat.toFixed(6);
+  const lng = e.latlng.lng.toFixed(6);
+  lastClickedCoord = `${lat},${lng}`;
+  document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
+});
 
 function navigateToPatrol(){
   if(!lastClickedCoord){ alert("⚠️ 먼저 좌표 선택"); return; }
@@ -163,6 +179,17 @@ function navigateToPatrol(){
       } else { window.open(webUrl,"_blank"); }
     }, ()=>window.open(`https://map.kakao.com/link/to/선택위치,${lat},${lng}`,"_blank"));
   } else { window.open(`https://map.kakao.com/link/to/선택위치,${lat},${lng}`,"_blank"); }
+}
+
+function shareKakaoLink(){
+  if(!lastClickedCoord){ alert("⚠️ 먼저 좌표 선택"); return; }
+  const [lat,lng] = lastClickedCoord.split(",");
+  const url = `https://map.kakao.com/link/map/선택위치,${lat},${lng}`;
+  if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
+    window.open(`kakaotalk://send?text=${encodeURIComponent(url)}`, "_blank");
+  } else {
+    prompt("카카오톡 공유용 URL:", url);
+  }
 }
 
 function completePatrol(){
@@ -240,4 +267,3 @@ showUpcomingPatrols();
 
 </body>
 </html>
-
