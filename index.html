@@ -235,13 +235,27 @@ function showUpcomingPatrols(){
   });
   if(upcoming.length===0){ list.innerHTML="<li>✅ 예정 없음</li>"; return; }
   upcoming.sort((a,b)=>(a.hour*60+a.minute)-(b.hour*60+b.minute));
-  upcoming.forEach(item=>{
-    const li=document.createElement("li");
-    li.style.color=item.isInTime?"blue":"black";
-    li.textContent=`${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
-    li.onclick=()=>{ activePatrol={task:item.task,hour:item.hour,minute:item.minute,key:item.key}; };
-    list.appendChild(li);
-  });
+  upcoming.forEach(item => {
+  const li = document.createElement("li");
+  li.style.color = item.isInTime ? "blue" : "black";
+  li.textContent = `${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
+
+  li.onclick = () => {
+    activePatrol = { task: item.task, hour: item.hour, minute: item.minute, key: item.key };
+    
+    // 선택한 순찰 대상의 좌표 가져오기
+    const patrolId = item.task.id;
+    const data = lampData[patrolId];
+    if (!data || !data.좌표) { alert("⚠️ 좌표 정보 없음"); return; }
+    lastClickedCoord = data.좌표;
+    document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
+
+    // 바로 길찾기 실행
+    navigateToPatrol();
+  };
+
+  list.appendChild(li);
+ });
 }
 
 document.querySelectorAll("#categoryList li").forEach(li=>{
@@ -267,3 +281,4 @@ showUpcomingPatrols();
 
 </body>
 </html>
+
