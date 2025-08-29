@@ -1,6 +1,6 @@
 const patrolSchedules = {
   안전조치: [
-  { id:"CV1(42호)", startDate:"2025-05-16", endDate:"2025-08-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"22:00", end:"23:00" }] },
+  { id:"CV1(42호)", startDate:"2025-05-16", endDate:"2025-09-26", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"22:00", end:"23:00" }] },
 
   { id:"CV2(41호)", startDate:"2025-08-12", endDate:"2025-09-11", daysOfWeek:[0,1,2,3,4,5,6], timeRanges:[{ start:"06:00", end:"07:00" },{ start:"21:00", end:"22:00" }] },
 
