@@ -242,22 +242,32 @@ function completePatrol(){
   if(!activePatrol){ return; }
   completedPatrols.add(activePatrol.key);
   localStorage.setItem("patrol_" + new Date().toISOString().slice(0,10), JSON.stringify([...completedPatrols]));
+
   const patrolId=activePatrol.task.id;
   const data=lampData[patrolId];
   const patrolTime=new Date().toLocaleString("ko-KR");
   const logLine=`아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 정보 없음"}, 주소: ${data?.주소||"주소 정보 없음"}\n`;
+
   const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
   localStorage.setItem(todayKey,newLog);
 
-  // 자동 저장 (미리보기 없음)
-  const blob=new Blob([newLog],{type:"text/plain"});
-  const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download=fileName; a.style.display="none";
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  // 👉 모바일 여부 확인
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  if (!isMobile) {
+    // PC에서는 파일 자동 다운로드
+    const blob=new Blob([newLog],{type:"text/plain"});
+    const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=fileName; a.style.display="none";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  } else {
+    // 모바일에서는 팝업 없이 로컬 저장만
+    console.log("📱 모바일: 파일 다운로드는 생략, localStorage에만 기록 저장됨.");
+  }
 
   activePatrol=null;
   showUpcomingPatrols();
@@ -271,5 +281,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
 
 
