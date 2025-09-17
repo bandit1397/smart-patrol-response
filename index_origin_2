@@ -239,7 +239,7 @@ function navigateToPatrol(){
 }
 
 function completePatrol(){
-  if(!activePatrol){ alert("🚫 진행 중인 순찰이 없습니다."); return; }
+  if(!activePatrol){ return; }
   completedPatrols.add(activePatrol.key);
   localStorage.setItem("patrol_" + new Date().toISOString().slice(0,10), JSON.stringify([...completedPatrols]));
   const patrolId=activePatrol.task.id;
@@ -250,16 +250,18 @@ function completePatrol(){
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
   localStorage.setItem(todayKey,newLog);
+
+  // 자동 저장 (미리보기 없음)
   const blob=new Blob([newLog],{type:"text/plain"});
-  const now=new Date();
-  const fileName=`patrol_log_${now.toISOString().slice(0,10)}_${now.getHours()}${now.getMinutes()}${now.getSeconds()}.txt`;
+  const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
-  a.href=url; a.download=fileName; a.style.display="none"; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-  alert(`✅ ${activePatrol.task.id} (${activePatrol.key.split("|")[1]}) 순찰 완료!`);
-  activePatrol=null; showUpcomingPatrols();
-}
+  a.href=url; a.download=fileName; a.style.display="none";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 
+  activePatrol=null;
+  showUpcomingPatrols();
+}
 document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("upcomingPanel").addEventListener("click",e=>{
     if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
@@ -269,3 +271,4 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
