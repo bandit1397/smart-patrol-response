@@ -1,75 +1,59 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <title>특정 poi 기반 출동/순찰 시스템</title>
-  <meta http-equiv="refresh" content="300">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
-    h3 { text-align: center; background: #007bff; color: white; margin: 0; padding: 10px; }
-    #panel { padding: 10px; text-align: center; max-width: 400px; margin: 10px auto; }
-    #panel input, #panel button {
-      width: 90%; max-width: 350px; padding: 10px; margin: 5px auto;
-      font-size: 16px; display: block; border: 1px solid #ccc; border-radius: 5px;
-    }
-    #map { height: 70vh; width: 100%; }
-    #clickedCoords {
-      width: 90%; max-width: 350px; padding: 8px; margin: 5px auto;
-      border: 1px solid #007bff; background: #eef6ff; font-size: 14px;
-      border-radius: 5px; text-align: center;
-    }
-    #copyBtn {
-      width: 90%; max-width: 350px; background: #ff9800; color: white;
-      border: none; padding: 8px; border-radius: 5px; cursor: pointer;
-    }
-    #completeBtn {
-      background: #28a745; color: white; border: none;
-      padding: 10px; border-radius: 5px; font-size: 16px;
-      cursor: pointer; width: 90%; max-width: 350px; margin: 10px auto; display: block;
-    }
-    #navigateBtn {
-      background:#007bff; color:white; border:none;
-      padding:10px; border-radius:5px; font-size:16px;
-      cursor:pointer; width:90%; max-width:350px; margin:10px auto; display:block;
-    }
-    #upcomingPanel {
-      position: fixed; top: 10px; right: 10px; width: 250px; max-height: 60vh;
-      overflow-y: auto; background: rgba(255,255,255,0.95);
-      border: 1px solid #007bff; border-radius: 5px; padding: 10px;
-      font-size: 14px; z-index: 9999; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-      transition: all 0.3s ease; cursor: pointer;
-    }
-    #upcomingPanel h4 { margin: 0 0 5px; font-size: 16px; color: #007bff; }
-    #upcomingList { list-style: none; padding: 0; margin: 0; }
-    #upcomingList li { padding: 5px 8px; border-bottom: 1px solid #ddd; cursor: pointer; border-radius: 3px; user-select: none; }
-    #upcomingList li:hover { background: #eef6ff; }
-    #upcomingPanel.hidden { width: 50px; height: 40px; padding: 5px; overflow: hidden; cursor: pointer; }
-    #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display: none; }
-    #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
-  </style>
- 
-  <script src="lampData.js"></script>
-  <script src="patrolSchedule.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=&libraries=places"></script>
+<meta charset="utf-8" />
+<title>특정 poi 기반 출동/순찰 시스템 (Leaflet)</title>
+<meta http-equiv="refresh" content="300">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+  h3 { text-align: center; background: #007bff; color: white; margin: 0; padding: 10px; }
+  #panel { padding: 10px; text-align: center; max-width: 400px; margin: 10px auto; }
+  #panel input, #panel button { width: 90%; max-width: 350px; padding: 10px; margin: 5px auto; font-size: 16px; display: block; border: 1px solid #ccc; border-radius: 5px; }
+  #map { height: 70vh; width: 100%; }
+  #clickedCoords { width: 90%; max-width: 350px; padding: 8px; margin: 5px auto; border: 1px solid #007bff; background: #eef6ff; font-size: 14px; border-radius: 5px; text-align: center; }
+  #copyRouteBtn { width: 90%; max-width: 350px; background: #ff9800; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
+  #completeBtn { background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 90%; max-width: 350px; margin: 10px auto; display: block; }
+  #navigateBtn { background:#007bff; color:white; border:none; padding:10px; border-radius:5px; font-size:16px; cursor:pointer; width:90%; max-width:350px; margin:10px auto; display:block; }
+  #upcomingPanel { position: fixed; top: 10px; right: 10px; width: 250px; max-height: 60vh; overflow-y: auto; background: rgba(255,255,255,0.95); border: 1px solid #007bff; border-radius: 5px; padding: 10px; font-size: 14px; z-index: 9999; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); transition: all 0.3s ease; cursor: pointer; }
+  #upcomingPanel h4 { margin: 0 0 5px; font-size: 16px; color: #007bff; }
+  #upcomingList { list-style: none; padding: 0; margin: 0; }
+  #upcomingList li { padding: 5px 8px; border-bottom: 1px solid #ddd; cursor: pointer; border-radius: 3px; user-select: none; }
+  #upcomingList li:hover { background: #eef6ff; }
+  #upcomingPanel.hidden { width: 50px; height: 40px; padding: 5px; overflow: hidden; cursor: pointer; }
+  #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display: none; }
+  #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
+</style>
+<script src="lampData.js"></script>
+<script src="patrolSchedule.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 </head>
 <body>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
 
 <div id="panel">
-  <!-- ✅ 카테고리 선택 드롭다운 대신 아래처럼 변경 -->
   <label>순찰카테고리:</label>
   <ul id="categoryList" style="list-style:none; padding:0; margin:5px auto; max-width:200px; display:flex; justify-content:center; gap:10px;">
     <li data-cat="안전조치" style="padding:5px 12px; border:1px solid #007bff; border-radius:5px; cursor:pointer; background:#007bff; color:white;">안전조치</li>
     <li data-cat="?" style="padding:5px 12px; border:1px solid #007bff; border-radius:5px; cursor:pointer; background:#007bff; color:white;">?</li>
   </ul>
-  
-  <input type="text" id="keyword" placeholder="키워드를 입력하세요 (예: L0, L003, 범자, 범 피, 전화번호 일부)" />
-  <button onclick="searchAndShow()">검색</button>
-  <div id="clickedCoords">📍 지도에서 위치를 클릭하면 좌표가 여기에 표시됩니다.</div>
-  <button id="copyBtn" onclick="copyCoords()">좌표 복사</button>
-  <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
-  <button id="navigateBtn" onclick="navigateToPatrol()">📍 Google Maps 길찾기</button>
+  <input type="text" id="keyword" placeholder="키워드입력(예:안양천 9-2, 공중전화, 안전조치 등)" />
+  <div style="display:flex; justify-content:center; gap:5px; max-width:350px; margin:5px auto;">
+    <button onclick="searchAndShow()">검색</button>
+    <button onclick="resetSearch()">초기화</button>
+  </div>
+  <div style="display:flex; align-items:center; justify-content:center; gap:5px; max-width:350px; margin:5px auto;">
+    <div id="clickedCoords">📍</div>
+    <button id="copyRouteBtn">📋 위치 url 복사</button>
+  </div>
+  <div style="display:flex; justify-content:center; gap:10px; max-width:350px; margin:10px auto;">
+    <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
+    <button id="navigateBtn" onclick="navigateToPatrol()">📍 길찾기</button>
+  </div>
 </div>
 
 <div id="upcomingPanel">
@@ -80,115 +64,63 @@
 <div id="map"></div>
 
 <script>
- 
-// ② 현재 활성화할 카테고리 (초기값)
-//let activeCategories = ["안전조치", "특별순찰"];
-  let activeCategories = ["안전조치"];
+let activeCategories = ["안전조치"];
+let activePatrol = null;
+let lastClickedCoord = "";
+let map, markers = [], markerCluster;
+let searchMode = false;
+let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
+let lastClickedMarker = null;
 
-// ③ 카테고리 변경 함수
-  function setActiveCategories(selectedCategories) {
+function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
-  console.log("현재 활성화된 순찰 카테고리:", activeCategories);
   updatePatrolDisplay();
 }
 
-
-// 🗂 4. 현재 활성 스케줄 가져오기 (기존 함수 대체)
-function getActivePatrolSchedule() {
-  let combined = [];
-  activeCategories.forEach(cat => {
-    if (patrolSchedules[cat]) {
-      combined = combined.concat(patrolSchedules[cat]);
-    }
-  });
-  return combined;
-}
-
-// ⑤ 드롭다운 이벤트 연결
-//  document.getElementById("categorySelect").addEventListener("change", function() {
-//  const selectedOptions = Array.from(this.selectedOptions).map(opt => opt.value);
-//  setActiveCategories(selectedOptions);
-//});
-
-// ⑤ 드롭다운 이벤트 연결
-document.querySelectorAll("#categoryList li").forEach(li => {
-  li.addEventListener("click", () => {
+document.querySelectorAll("#categoryList li").forEach(li=>{
+  li.addEventListener("click", ()=>{
     const cat = li.getAttribute("data-cat");
-    if (activeCategories.includes(cat)) {
-      // 이미 선택된 카테고리면 해제 (배경색 바꾸기)
-      activeCategories = activeCategories.filter(c => c !== cat);
-      li.style.background = "white";
-      li.style.color = "#007bff";
-      li.style.border = "1px solid #007bff";
+    if(activeCategories.includes(cat)){
+      activeCategories = activeCategories.filter(c=>c!==cat);
+      li.style.background="white"; li.style.color="#007bff"; li.style.border="1px solid #007bff";
     } else {
-      // 선택 안된 카테고리면 추가
       activeCategories.push(cat);
-      li.style.background = "#007bff";
-      li.style.color = "white";
-      li.style.border = "1px solid #007bff";
+      li.style.background="#007bff"; li.style.color="white"; li.style.border="1px solid #007bff";
     }
-    console.log("현재 활성화된 순찰 카테고리:", activeCategories);
     updatePatrolDisplay();
   });
 });
 
-
-// 🗂 6. 화면 갱신 함수
-function updatePatrolDisplay() {
-  // 필요하다면 지도 마커를 갱신하도록 확장 가능
-  showUpcomingPatrols();
+function getActivePatrolSchedule(){
+  let combined=[];
+  activeCategories.forEach(cat=>{ if(patrolSchedules[cat]) combined=combined.concat(patrolSchedules[cat]); });
+  return combined;
 }
 
- 
-/* ✅ 날짜/시간 유틸 함수 */
-function isWithinDateRange(dateStr,startDateStr,endDateStr){ const d=new Date(dateStr); return d>=new Date(startDateStr)&&d<=new Date(endDateStr); }
-function isDayAllowed(date,days){return days.includes(date.getDay());}
-function parseCoords(s){const[a,b]=s.split(",").map(Number);return{lat:a,lng:b};}
+function updatePatrolDisplay(){ showUpcomingPatrols(); }
+
+function parseCoords(s){ const[a,b]=s.split(",").map(Number); return{lat:a,lng:b}; }
 function pad(n){ return n.toString().padStart(2,"0"); }
-function normalizeText(str){ return (str||"").toLowerCase().replace(/[\s\-\_\.,]/g,""); }
-function isSequenceMatch(text, keyword){ let idx=0; for(const ch of keyword){ idx=text.indexOf(ch, idx); if(idx === -1) return false; idx++; } return true; }
 
-/* ✅ 로컬스토리지 관리 */
-function getTodayKey(){ return "patrol_" + new Date().toISOString().slice(0,10); }
-function loadCompletedPatrols(){ const data=localStorage.getItem(getTodayKey()); return data?new Set(JSON.parse(data)):new Set(); }
-function saveCompletedPatrols(){ localStorage.setItem(getTodayKey(), JSON.stringify([...completedPatrols])); }
-let completedPatrols = loadCompletedPatrols();
-
-/* ✅ 상태 변수 */
-let activePatrol = null;
-let lastClickedCoord = "";
-let map, markers=[], infoWindow;
-
-/* ✅ 순찰 리스트 표시 */
 function showUpcomingPatrols(){
   const now=new Date(), nowM=now.getHours()*60+now.getMinutes();
-  const list=document.getElementById("upcomingList");
-  list.innerHTML="";
+  const list=document.getElementById("upcomingList"); list.innerHTML="";
   const upcoming=[];
-
   const patrolSchedule = getActivePatrolSchedule();
-
   patrolSchedule.forEach(task=>{
-    if(!isWithinDateRange(now.toISOString().slice(0,10),task.startDate,task.endDate)) return;
-    if(!isDayAllowed(now,task.daysOfWeek)) return;
-
+    if(!(new Date(now.toISOString().slice(0,10))>=new Date(task.startDate) && new Date(now.toISOString().slice(0,10))<=new Date(task.endDate))) return;
+    if(!task.daysOfWeek.includes(now.getDay())) return;
     task.timeRanges.forEach(r=>{
       const [sH,sM]=r.start.split(":").map(Number);
       const [eH,eM]=r.end.split(":").map(Number);
-      const startM=sH*60+sM-30;
-      const endM=eH*60+eM+30;
+      const startM=sH*60+sM-30, endM=eH*60+eM+30;
       const isOngoing=nowM>=sH*60+sM && nowM<=eH*60+eM;
       const isInWindow=nowM>=startM && nowM<=endM;
       const patrolKey=`${task.id}|${r.start}~${r.end}`;
-
-      if(isInWindow && !completedPatrols.has(patrolKey)){
-        upcoming.push({task,hour:sH,minute:sM,endHour:eH,endMinute:eM,key:patrolKey,isInTime:isOngoing});
-      }
+      if(isInWindow && !completedPatrols.has(patrolKey)) upcoming.push({task,hour:sH,minute:sM,endHour:eH,endMinute:eM,key:patrolKey,isInTime:isOngoing});
     });
   });
-
   if(upcoming.length===0){ list.innerHTML="<li>✅ 예정 없음</li>"; return; }
-
   upcoming.sort((a,b)=>(a.hour*60+a.minute)-(b.hour*60+b.minute));
   upcoming.forEach(item=>{
     const li=document.createElement("li");
@@ -196,166 +128,158 @@ function showUpcomingPatrols(){
     li.textContent=`${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
     li.onclick=()=>{
       activePatrol={task:item.task,hour:item.hour,minute:item.minute,key:item.key};
-      const id = item.task.id;
+      const id=item.task.id;
       if(!lampData[id]){ alert("해당 ID의 좌표 정보가 없습니다."); return; }
       const pos=parseCoords(lampData[id].좌표);
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${pos.lat},${pos.lng}`,"_blank");
+      window.open(`https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`,"_blank");
     };
     list.appendChild(li);
   });
 }
 
-/* ------------------------ ✅ 지도 기능 ------------------------ */
 function initMap(){
-  map=new google.maps.Map(document.getElementById("map"),{center:{lat:37.3857,lng:126.6586},zoom:15});
-  infoWindow=new google.maps.InfoWindow();
-  map.addListener("click",e=>{
-    lastClickedCoord=`${e.latLng.lat().toFixed(6)},${e.latLng.lng().toFixed(6)}`;
-    document.getElementById("clickedCoords").innerText=`📍 클릭 좌표: ${lastClickedCoord}`;
+  map = L.map('map').setView([37.3857,126.6586], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+  markerCluster = L.markerClusterGroup();
+  map.addLayer(markerCluster);
+
+  map.on("click", e=>{
+    if(searchMode) return;
+    lastClickedCoord = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
+    document.getElementById("clickedCoords").innerText = `📍 클릭 좌표: ${lastClickedCoord}`;
+    if(window.lastClickMarker) markerCluster.removeLayer(window.lastClickMarker);
+    window.lastClickMarker = L.marker(e.latlng, { icon: L.icon({iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png", iconSize:[32,32]}) }).addTo(markerCluster);
   });
 }
-function copyCoords(){ if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하세요."); return; } navigator.clipboard.writeText(lastClickedCoord).then(()=>alert("✅ 복사됨: "+lastClickedCoord)); }
-function clearMarkers(){ markers.forEach(m=>m.setMap(null)); markers=[]; }
-function addMarker(id,pos,color){
-  const m=new google.maps.Marker({position:pos,map,label:id,icon:{url:`http://maps.google.com/mapfiles/ms/icons/${color}-dot.png`}});
-  m.addListener("click", () => {
-    const data = lampData[id];
-    infoWindow.setContent(`
-      <div style="min-width:150px;">
-        <strong>${data.고유이름}</strong><br/>
-        <b>분류:</b> ${data.분류}<br/>
-        <b>전화번호:</b> ${data.전화번호}<br/>
-        <b>주소:</b> ${data.주소}<br/>
-        <b>특이사항:</b> ${data.특이사항}
-      </div>
-  `  );
-    infoWindow.open(map, m);
+
+function clearMarkers(){ markerCluster.clearLayers(); markers=[]; }
+
+function addMarker(id, pos, color){
+  const defaultIcon = L.icon({
+    iconUrl: `https://maps.google.com/mapfiles/ms/icons/${color}-dot.png`,
+    iconSize: [32, 32]
   });
-  m.addListener("dblclick",()=>{const c=lampData[id].좌표.split(",");window.open(`https://www.google.com/maps/dir/?api=1&destination=${c[0]},${c[1]}`,"_blank");});
+  const clickedIcon = L.icon({
+    iconUrl: `https://maps.google.com/mapfiles/ms/icons/red-dot.png`,
+    iconSize: [32, 32]
+  });
+
+  const m = L.marker([pos.lat, pos.lng], { icon: defaultIcon });
+  m.bindPopup(`<strong>${lampData[id].고유이름}</strong><br/><b>분류:</b> ${lampData[id].분류}<br/><b>전화번호:</b> ${lampData[id].전화번호}<br/><b>주소:</b> ${lampData[id].주소}<br/><b>특이사항:</b> ${lampData[id].특이사항}`);
+
+  m.on("click", () => {
+    // 클릭된 마커 색상 변경
+    m.setIcon(clickedIcon);
+
+    // 이전 클릭 마커가 있으면 원래 색으로 복원
+    if (lastClickedMarker && lastClickedMarker !== m) {
+      lastClickedMarker.setIcon(defaultIcon);
+    }
+    lastClickedMarker = m;
+
+    // 클릭 좌표 업데이트
+    lastClickedCoord = lampData[id].좌표;
+    document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
+  });
+
+  markerCluster.addLayer(m);
   markers.push(m);
 }
 
-/* ✅ 검색 */
+// 클릭 좌표 → 카카오맵 URL 복사
+document.getElementById("copyRouteBtn").addEventListener("click",()=>{
+  if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하세요."); return; }
+  const [lat,lng]=lastClickedCoord.split(",");
+  const kakaoWebUrl=`https://map.kakao.com/link/to/${encodeURIComponent("선택위치")},${lat},${lng}`;
+  navigator.clipboard.writeText(kakaoWebUrl)
+    .then(()=>alert("✅ 링크가 복사되었습니다.\n다른 사람에게 보내면 해당 위치 길찾기 가능"))
+    .catch(()=>alert("❌ 클립보드 복사 실패"));
+});
+
+function normalizeSimple(str){ return (str||"").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g,""); }
+
 function searchAndShow() {
   const kw = document.getElementById("keyword").value.trim();
-  if (!kw) {
-    alert("⚠️ 키워드 입력하세요.");
-    return;
-  }
-
+  if (!kw) { alert("⚠️ 키워드 입력하세요."); return; }
+  searchMode = true;
   clearMarkers();
 
-  const kwLower = kw.toLowerCase().replace(/\s+/g, ""); // 공백 제거
-  if (kwLower.length < 2) {
-    alert("⚠️ 최소 2글자 이상 입력");
-    return;
-  }
+  const kwNormalized = normalizeSimple(kw);
+  if(kwNormalized.length<2){ alert("⚠️ 최소 2글자 이상 입력"); return; }
+  const kwRegex = new RegExp(kwNormalized.split("").join(".*"), "i");
 
-  const normalizeSimple = str => (str || "").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g, "");
-
-  const kwNormalized = normalizeSimple(kwLower);
-
-  const res = Object.keys(lampData).filter(id => {
+  const res = Object.keys(lampData).filter(id=>{
     const d = lampData[id];
+    const fields = [d.고유이름,d.전화번호,d.주소,d.분류,d.특이사항];
+    return fields.some(f=>kwRegex.test(normalizeSimple(f)));
+  }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
 
-    const fields = [
-      d.고유이름,
-      d.전화번호,
-      d.주소,
-      d.분류,
-      d.특이사항
-    ];
-
-    return fields.some(field => {
-      const text = (field || "").toLowerCase();
-      const textNorm = normalizeSimple(text);
-
-      return (
-        text.includes(kwLower) ||                      // ✅ 특수문자 포함한 사용자 입력 그대로 포함
-        textNorm.includes(kwNormalized) ||             // ✅ 정규화 후 포함
-        isSequenceMatch(text, kwLower) ||              // ✅ 순서 일치 검색
-        isSequenceMatch(textNorm, kwNormalized)        // ✅ 정규화 + 순서 일치 검색
-      );
-    });
-  }).map(id => ({
-    id,
-    pos: parseCoords(lampData[id].좌표)
-  }));
-
-  if (res.length === 0) {
-    alert("❌ 검색 결과 없음");
-    return;
-  }
-
-  const bounds = new google.maps.LatLngBounds();
-  res.forEach(r => {
-    addMarker(r.id, r.pos, "blue");
-    bounds.extend(r.pos);
-  });
+  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
+  const bounds = L.latLngBounds();
+  res.forEach(r=>{ addMarker(r.id,r.pos,"blue"); bounds.extend([r.pos.lat,r.pos.lng]); });
   map.fitBounds(bounds);
 }
 
-/* ✅ 길찾기 버튼 */
+function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; }
+
 function navigateToPatrol(){
   if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); return; }
-  const [lat,lng]=lastClickedCoord.split(",");
-  window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,"_blank");
+  const [destLat,destLng]=lastClickedCoord.split(",");
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const startLat=pos.coords.latitude.toFixed(6), startLng=pos.coords.longitude.toFixed(6);
+      const appUrl=`kakaomap://route?sp=${startLat},${startLng}&ep=${destLat},${destLng}&by=CAR`;
+      const webUrl=`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`;
+      if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
+        window.location.href=appUrl;
+        setTimeout(()=>window.open(webUrl,"_blank"),1500);
+      } else { window.open(webUrl,"_blank"); }
+    },()=>{ alert("현위치를 가져올 수 없습니다. 웹으로 이동합니다."); window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); });
+  } else { window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); }
 }
 
-/* ✅ 📌 순찰 완료 → 로그 파일에 append */
 function completePatrol(){
-  if(!activePatrol){ alert("🚫 진행 중인 순찰이 없습니다."); return; }
+  if(!activePatrol){ return; }
   completedPatrols.add(activePatrol.key);
-  saveCompletedPatrols();
+  localStorage.setItem("patrol_" + new Date().toISOString().slice(0,10), JSON.stringify([...completedPatrols]));
 
-  const patrolId = activePatrol.task.id;  // (예: "CV11(41호)")
-  const data = lampData[patrolId];
-  const patrolTime = new Date().toLocaleString("ko-KR");
-  const logLine = `아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름 || "이름 정보 없음"},  주소: ${data?.주소 || "주소 정보 없음"}\n`;
+  const patrolId=activePatrol.task.id;
+  const data=lampData[patrolId];
+  const patrolTime=new Date().toLocaleString("ko-KR");
+  const logLine=`아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 정보 없음"}, 주소: ${data?.주소||"주소 정보 없음"}\n`;
 
-
- // 변경된 부분: 날짜별 키 사용
-  const todayKey = "patrol_text_log_" + new Date().toISOString().slice(0,10);
+  const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
-  localStorage.setItem(todayKey, newLog);
+  localStorage.setItem(todayKey,newLog);
 
-  // ✅ 하나의 파일로 다운로드
-  const blob = new Blob([newLog], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "patrol_log.txt";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // 👉 모바일 여부 확인
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
 
-  alert(`✅ ${activePatrol.task.id} (${activePatrol.key.split("|")[1]}) 순찰 완료!`);
+  if (!isMobile) {
+    // PC에서는 파일 자동 다운로드
+    const blob=new Blob([newLog],{type:"text/plain"});
+    const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=fileName; a.style.display="none";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  } else {
+    // 모바일에서는 팝업 없이 로컬 저장만
+    console.log("📱 모바일: 파일 다운로드는 생략, localStorage에만 기록 저장됨.");
+  }
+
   activePatrol=null;
   showUpcomingPatrols();
 }
-
-
-/* ✅ 초기화 */
 document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("upcomingPanel").addEventListener("click",e=>{
     if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
   });
+  initMap(); updatePatrolDisplay();
 });
-
-
-window.onload=()=>{ initMap(); showUpcomingPatrols(); setInterval(showUpcomingPatrols,300000); };
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
 
 
