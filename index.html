@@ -305,7 +305,7 @@ function completePatrol(){
     if (key.startsWith("patrol_text_log_")){
       const dateStr = key.replace("patrol_text_log_","");
       const logDate = new Date(dateStr);
-      if ((today - logDate) / (1000*60*60*24) > 2){
+      if ((today - logDate) / (1000*60*60*24) > 1){
         keysToDelete.push(key);
       }
     }
@@ -340,6 +340,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
