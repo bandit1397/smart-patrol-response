@@ -286,14 +286,14 @@ function completePatrol(){
   const newLog = existingLog + logLine;
   localStorage.setItem(todayKey,newLog);
 
-  // 👉 오래된 로그(7일 이상 지난 것) 자동 삭제
+  // 👉 오래된 로그(2일 이상 지난 것) 자동 삭제
   const today = new Date();
   for (let i=0; i<localStorage.length; i++){
     const key = localStorage.key(i);
     if (key.startsWith("patrol_text_log_")){
       const dateStr = key.replace("patrol_text_log_","");
       const logDate = new Date(dateStr);
-      if ((today - logDate) / (1000*60*60*24) > 7){
+      if ((today - logDate) / (1000*60*60*24) > 2){
         localStorage.removeItem(key);
       }
     }
@@ -326,6 +326,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
 
 
 
