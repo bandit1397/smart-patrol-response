@@ -279,25 +279,32 @@ function navigateToPatrol(){
 function completePatrol(){
   if(!activePatrol){ return; }
 
-  // ✅ 오늘 완료 순찰 목록 갱신
   completedPatrols.add(activePatrol.key);
   localStorage.setItem(
     "patrol_" + new Date().toISOString().slice(0,10),
     JSON.stringify([...completedPatrols])
   );
 
-  // ✅ 순찰 로그 기록
   const patrolId = activePatrol.task.id;
   const data = lampData[patrolId];
-  const patrolTime = new Date().toLocaleString("ko-KR");
+  const now = new Date();
+
+  // ✅ 오늘 00:01 이후인지 검사
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 1, 0);
+  if(now < todayMidnight){ 
+    // 아직 오늘 00:01 전이면 기록 안 함
+    return; 
+  }
+
+  const patrolTime = now.toLocaleString("ko-KR");
   const logLine = `아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 없음"}, 주소: ${data?.주소||"주소 없음"}\n`;
 
-  const todayKey = "patrol_text_log_" + new Date().toISOString().slice(0,10);
+  const todayKey = "patrol_text_log_" + now.toISOString().slice(0,10);
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
   localStorage.setItem(todayKey, newLog);
 
-  // ✅ 오래된 로그(2일 이상 지난 것) 자동 삭제
+  // 오래된 로그 삭제
   const today = new Date();
   const keysToDelete = [];
   for (let i = 0; i < localStorage.length; i++){
@@ -312,7 +319,6 @@ function completePatrol(){
   }
   keysToDelete.forEach(k => localStorage.removeItem(k));
 
-  // ✅ 뷰어나 다운로드 자동 실행 ❌ (ON/OFF는 toggleLogViewer()에서만)
   activePatrol = null;
   showUpcomingPatrols();
 }
@@ -340,6 +346,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
+
+
 
 
 
