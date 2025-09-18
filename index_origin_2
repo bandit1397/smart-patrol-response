@@ -328,7 +328,16 @@ function toggleLogViewer(){
   const logContent=document.getElementById("logContent");
   if(logContent.style.display==="none" || logContent.style.display===""){
     const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
-    logContent.value=localStorage.getItem(todayKey)||"";
+    const allLogs = localStorage.getItem(todayKey) || "";
+
+    // ✅ 오늘 날짜 문자열만 필터링
+    const todayDateStr = new Date().toLocaleDateString("ko-KR"); 
+    const filteredLogs = allLogs
+      .split("\n")
+      .filter(line => line.includes(todayDateStr))
+      .join("\n");
+
+    logContent.value = filteredLogs;
     logContent.style.display="block";
   } else {
     logContent.style.display="none";
@@ -346,7 +355,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
-
 
 
 
