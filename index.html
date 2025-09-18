@@ -110,29 +110,54 @@ function parseCoords(s){ const[a,b]=s.split(",").map(Number); return{lat:a,lng:b
 function pad(n){ return n.toString().padStart(2,"0"); }
 
 function showUpcomingPatrols(){
-  const now=new Date(), nowM=now.getHours()*60+now.getMinutes();
-  const list=document.getElementById("upcomingList"); list.innerHTML="";
-  const upcoming=[];
+  const now = new Date(), nowM = now.getHours()*60 + now.getMinutes();
+  const list = document.getElementById("upcomingList"); 
+  list.innerHTML = "";
+  const upcoming = [];
   const patrolSchedule = getActivePatrolSchedule();
+
   patrolSchedule.forEach(task=>{
-    if(!(new Date(now.toISOString().slice(0,10))>=new Date(task.startDate) && new Date(now.toISOString().slice(0,10))<=new Date(task.endDate))) return;
-    if(!task.daysOfWeek.includes(now.getDay())) return;
+    // ✅ 날짜 비교 (UTC 보정)
+    const todayStr = now.toISOString().slice(0,10);
+    const todayDate = new Date(todayStr + "T00:00:00");
+    const startDate = new Date(task.startDate + "T00:00:00");
+    const endDate   = new Date(task.endDate + "T23:59:59"); // 종료일 포함
+
+    if (!(todayDate >= startDate && todayDate <= endDate)) return;
+
+    // 요일 조건
+    if (!task.daysOfWeek.includes(now.getDay())) return;
+
+    // 시간 조건
     task.timeRanges.forEach(r=>{
-      const [sH,sM]=r.start.split(":").map(Number);
-      const [eH,eM]=r.end.split(":").map(Number);
-      const startM=sH*60+sM-30, endM=eH*60+eM+30;
-      const isOngoing=nowM>=sH*60+sM && nowM<=eH*60+eM;
-      const isInWindow=nowM>=startM && nowM<=endM;
-      const patrolKey=`${task.id}|${r.start}~${r.end}`;
-      if(isInWindow && !completedPatrols.has(patrolKey)) upcoming.push({task,hour:sH,minute:sM,endHour:eH,endMinute:eM,key:patrolKey,isInTime:isOngoing});
+      const [sH,sM] = r.start.split(":").map(Number);
+      const [eH,eM] = r.end.split(":").map(Number);
+      const startM = sH*60 + sM - 30;
+      const endM   = eH*60 + eM + 30;
+      const isOngoing = nowM >= sH*60 + sM && nowM <= eH*60 + eM;
+      const isInWindow = nowM >= startM && nowM <= endM;
+      const patrolKey = `${task.id}|${r.start}~${r.end}`;
+
+      if (isInWindow && !completedPatrols.has(patrolKey)) {
+        upcoming.push({
+          task, hour:sH, minute:sM, 
+          endHour:eH, endMinute:eM, 
+          key:patrolKey, isInTime:isOngoing
+        });
+      }
     });
   });
-  if(upcoming.length===0){ list.innerHTML="<li>✅ 예정 없음</li>"; return; }
+
+  if (upcoming.length===0){ 
+    list.innerHTML="<li>✅ 예정 없음</li>"; 
+    return; 
+  }
+
   upcoming.sort((a,b)=>(a.hour*60+a.minute)-(b.hour*60+b.minute));
   upcoming.forEach(item=>{
     const li=document.createElement("li");
-    li.style.color=item.isInTime?"blue":"black";
-    li.textContent=`${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
+    li.style.color = item.isInTime ? "blue" : "black";
+    li.textContent = `${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
     li.onclick=()=>{
       activePatrol={task:item.task,hour:item.hour,minute:item.minute,key:item.key};
       const id=item.task.id;
@@ -143,6 +168,7 @@ function showUpcomingPatrols(){
     list.appendChild(li);
   });
 }
+
 
 function initMap(){
   map = L.map('map').setView([37.3857,126.6586], 15);
@@ -300,6 +326,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
 
 
 
