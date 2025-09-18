@@ -56,6 +56,13 @@
   </div>
 </div>
 
+<div id="logViewer" style="max-width:350px; margin:10px auto; display:none;">
+  <h4>📋 오늘 순찰 로그</h4>
+  <textarea id="logContent" readonly 
+    style="width:100%; height:150px; font-size:14px; padding:5px; border:1px solid #007bff; border-radius:5px;">
+  </textarea>
+</div>
+
 <div id="upcomingPanel">
   <h4>⏰ 순찰 후 순찰완료 요망</h4>
   <ul id="upcomingList"></ul>
@@ -103,29 +110,54 @@ function parseCoords(s){ const[a,b]=s.split(",").map(Number); return{lat:a,lng:b
 function pad(n){ return n.toString().padStart(2,"0"); }
 
 function showUpcomingPatrols(){
-  const now=new Date(), nowM=now.getHours()*60+now.getMinutes();
-  const list=document.getElementById("upcomingList"); list.innerHTML="";
-  const upcoming=[];
+  const now = new Date(), nowM = now.getHours()*60 + now.getMinutes();
+  const list = document.getElementById("upcomingList"); 
+  list.innerHTML = "";
+  const upcoming = [];
   const patrolSchedule = getActivePatrolSchedule();
+
   patrolSchedule.forEach(task=>{
-    if(!(new Date(now.toISOString().slice(0,10))>=new Date(task.startDate) && new Date(now.toISOString().slice(0,10))<=new Date(task.endDate))) return;
-    if(!task.daysOfWeek.includes(now.getDay())) return;
+    // ✅ 날짜 비교 (UTC 보정)
+    const todayStr = now.toISOString().slice(0,10);
+    const todayDate = new Date(todayStr + "T00:00:00");
+    const startDate = new Date(task.startDate + "T00:00:00");
+    const endDate   = new Date(task.endDate + "T23:59:59"); // 종료일 포함
+
+    if (!(todayDate >= startDate && todayDate <= endDate)) return;
+
+    // 요일 조건
+    if (!task.daysOfWeek.includes(now.getDay())) return;
+
+    // 시간 조건
     task.timeRanges.forEach(r=>{
-      const [sH,sM]=r.start.split(":").map(Number);
-      const [eH,eM]=r.end.split(":").map(Number);
-      const startM=sH*60+sM-30, endM=eH*60+eM+30;
-      const isOngoing=nowM>=sH*60+sM && nowM<=eH*60+eM;
-      const isInWindow=nowM>=startM && nowM<=endM;
-      const patrolKey=`${task.id}|${r.start}~${r.end}`;
-      if(isInWindow && !completedPatrols.has(patrolKey)) upcoming.push({task,hour:sH,minute:sM,endHour:eH,endMinute:eM,key:patrolKey,isInTime:isOngoing});
+      const [sH,sM] = r.start.split(":").map(Number);
+      const [eH,eM] = r.end.split(":").map(Number);
+      const startM = sH*60 + sM - 30;
+      const endM   = eH*60 + eM + 30;
+      const isOngoing = nowM >= sH*60 + sM && nowM <= eH*60 + eM;
+      const isInWindow = nowM >= startM && nowM <= endM;
+      const patrolKey = `${task.id}|${r.start}~${r.end}`;
+
+      if (isInWindow && !completedPatrols.has(patrolKey)) {
+        upcoming.push({
+          task, hour:sH, minute:sM, 
+          endHour:eH, endMinute:eM, 
+          key:patrolKey, isInTime:isOngoing
+        });
+      }
     });
   });
-  if(upcoming.length===0){ list.innerHTML="<li>✅ 예정 없음</li>"; return; }
+
+  if (upcoming.length===0){ 
+    list.innerHTML="<li>✅ 예정 없음</li>"; 
+    return; 
+  }
+
   upcoming.sort((a,b)=>(a.hour*60+a.minute)-(b.hour*60+b.minute));
   upcoming.forEach(item=>{
     const li=document.createElement("li");
-    li.style.color=item.isInTime?"blue":"black";
-    li.textContent=`${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
+    li.style.color = item.isInTime ? "blue" : "black";
+    li.textContent = `${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
     li.onclick=()=>{
       activePatrol={task:item.task,hour:item.hour,minute:item.minute,key:item.key};
       const id=item.task.id;
@@ -136,6 +168,7 @@ function showUpcomingPatrols(){
     list.appendChild(li);
   });
 }
+
 
 function initMap(){
   map = L.map('map').setView([37.3857,126.6586], 15);
@@ -242,22 +275,44 @@ function completePatrol(){
   if(!activePatrol){ return; }
   completedPatrols.add(activePatrol.key);
   localStorage.setItem("patrol_" + new Date().toISOString().slice(0,10), JSON.stringify([...completedPatrols]));
+
   const patrolId=activePatrol.task.id;
   const data=lampData[patrolId];
   const patrolTime=new Date().toLocaleString("ko-KR");
-  const logLine=`아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 정보 없음"}, 주소: ${data?.주소||"주소 정보 없음"}\n`;
+  const logLine=`아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 없음"}, 주소: ${data?.주소||"주소 없음"}\n`;
+
   const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
   localStorage.setItem(todayKey,newLog);
 
-  // 자동 저장 (미리보기 없음)
-  const blob=new Blob([newLog],{type:"text/plain"});
-  const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download=fileName; a.style.display="none";
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  // 👉 오래된 로그(2일 이상 지난 것) 자동 삭제
+  const today = new Date();
+  for (let i=0; i<localStorage.length; i++){
+    const key = localStorage.key(i);
+    if (key.startsWith("patrol_text_log_")){
+      const dateStr = key.replace("patrol_text_log_","");
+      const logDate = new Date(dateStr);
+      if ((today - logDate) / (1000*60*60*24) > 2){
+        localStorage.removeItem(key);
+      }
+    }
+  }
+
+  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  if (!isMobile) {
+    // PC: 파일 자동 다운로드
+    const blob=new Blob([newLog],{type:"text/plain"});
+    const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=fileName; a.style.display="none";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  } else {
+    // 📱 모바일: 로그 뷰어에 표시
+    document.getElementById("logViewer").style.display="block";
+    document.getElementById("logContent").value=newLog;
+  }
 
   activePatrol=null;
   showUpcomingPatrols();
@@ -271,4 +326,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 </script>
 </body>
 </html>
+
+
+
+
 
