@@ -56,18 +56,23 @@
   </div>
 </div>
 
-<div id="logViewer" style="max-width:350px; margin:10px auto; display:none;">
-  <h4>📋 오늘 순찰 로그</h4>
-  <textarea id="logContent" readonly 
-    style="width:100%; height:150px; font-size:14px; padding:5px; border:1px solid #007bff; border-radius:5px;">
-  </textarea>
-</div>
-
 <div id="upcomingPanel">
   <h4>⏰ 순찰 후 순찰완료 요망</h4>
   <ul id="upcomingList"></ul>
 </div>
-
+  
+<!-- 📋 오른쪽 아래 고정형 로그 뷰어 -->
+<div id="logViewer" style="position:fixed; bottom:10px; right:10px; width:250px; 
+  background:#fff; border:1px solid #007bff; border-radius:5px; 
+  box-shadow:2px 2px 5px rgba(0,0,0,0.2); z-index:9999;">
+  <div style="background:#007bff; color:white; padding:5px; cursor:pointer;" onclick="toggleLogViewer()">
+    📋 오늘 순찰 로그 (열기/닫기)
+  </div>
+  <textarea id="logContent" readonly
+    style="width:100%; height:150px; font-size:14px; padding:5px; border:none; resize:none; display:none;">
+  </textarea>
+</div>
+  
 <div id="map"></div>
 
 <script>
@@ -273,59 +278,76 @@ function navigateToPatrol(){
 
 function completePatrol(){
   if(!activePatrol){ return; }
+
+  // ✅ 오늘 완료 순찰 목록 갱신
   completedPatrols.add(activePatrol.key);
-  localStorage.setItem("patrol_" + new Date().toISOString().slice(0,10), JSON.stringify([...completedPatrols]));
+  localStorage.setItem(
+    "patrol_" + new Date().toISOString().slice(0,10),
+    JSON.stringify([...completedPatrols])
+  );
 
-  const patrolId=activePatrol.task.id;
-  const data=lampData[patrolId];
-  const patrolTime=new Date().toLocaleString("ko-KR");
-  const logLine=`아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 없음"}, 주소: ${data?.주소||"주소 없음"}\n`;
+  // ✅ 순찰 로그 기록
+  const patrolId = activePatrol.task.id;
+  const data = lampData[patrolId];
+  const patrolTime = new Date().toLocaleString("ko-KR");
+  const logLine = `아이디: ${patrolId}, 순찰시간: ${patrolTime}, 고유이름: ${data?.고유이름||"이름 없음"}, 주소: ${data?.주소||"주소 없음"}\n`;
 
-  const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
+  const todayKey = "patrol_text_log_" + new Date().toISOString().slice(0,10);
   const existingLog = localStorage.getItem(todayKey) || "";
   const newLog = existingLog + logLine;
-  localStorage.setItem(todayKey,newLog);
+  localStorage.setItem(todayKey, newLog);
 
-  // 👉 오래된 로그(2일 이상 지난 것) 자동 삭제
+  // ✅ 오래된 로그(2일 이상 지난 것) 자동 삭제
   const today = new Date();
-  for (let i=0; i<localStorage.length; i++){
+  const keysToDelete = [];
+  for (let i = 0; i < localStorage.length; i++){
     const key = localStorage.key(i);
     if (key.startsWith("patrol_text_log_")){
       const dateStr = key.replace("patrol_text_log_","");
       const logDate = new Date(dateStr);
-      if ((today - logDate) / (1000*60*60*24) > 2){
-        localStorage.removeItem(key);
+      if ((today - logDate) / (1000*60*60*24) > 1){
+        keysToDelete.push(key);
       }
     }
   }
+  keysToDelete.forEach(k => localStorage.removeItem(k));
 
-  const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-  if (!isMobile) {
-    // PC: 파일 자동 다운로드
-    const blob=new Blob([newLog],{type:"text/plain"});
-    const fileName=`patrol_log_${new Date().toISOString().slice(0,10)}.txt`;
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url; a.download=fileName; a.style.display="none";
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-  } else {
-    // 📱 모바일: 로그 뷰어에 표시
-    document.getElementById("logViewer").style.display="block";
-    document.getElementById("logContent").value=newLog;
-  }
-
-  activePatrol=null;
+  // ✅ 뷰어나 다운로드 자동 실행 ❌ (ON/OFF는 toggleLogViewer()에서만)
+  activePatrol = null;
   showUpcomingPatrols();
 }
-document.addEventListener("DOMContentLoaded",()=>{
+
+// 📋 로그 뷰어 ON/OFF
+function toggleLogViewer(){
+  const logContent=document.getElementById("logContent");
+  if(logContent.style.display==="none" || logContent.style.display===""){
+    const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
+    logContent.value=localStorage.getItem(todayKey)||"";
+    logContent.style.display="block";
+  } else {
+    logContent.style.display="none";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  // 처음에는 textarea 닫힘 상태 유지
   document.getElementById("upcomingPanel").addEventListener("click",e=>{
     if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
   });
-  initMap(); updatePatrolDisplay();
+  initMap(); 
+  updatePatrolDisplay();
 });
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 
