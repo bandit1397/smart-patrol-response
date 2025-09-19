@@ -46,15 +46,26 @@
     <button onclick="searchAndShow()">검색</button>
     <button onclick="resetSearch()">초기화</button>
   </div>
+
+  <!-- 클릭 좌표 영역 -->
   <div style="display:flex; align-items:center; justify-content:center; gap:5px; max-width:350px; margin:5px auto;">
     <div id="clickedCoords">📍</div>
     <button id="copyRouteBtn">📋 위치 url 복사</button>
   </div>
-  <div style="display:flex; justify-content:center; gap:10px; max-width:350px; margin:10px auto;">
+
+  <!-- 순찰완료, 순찰로그, 길찾기 버튼 순서 변경 -->
+  <div style="display:flex; flex-direction:column; gap:10px; max-width:350px; margin:10px auto;">
     <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
+    <button id="logBtn" onclick="toggleLogViewer()">📋 순찰 로그</button>
     <button id="navigateBtn" onclick="navigateToPatrol()">📍 길찾기</button>
   </div>
+
+  <!-- 로그 textarea -->
+  <textarea id="logContent" readonly
+    style="width:100%; height:150px; font-size:14px; padding:5px; border:1px solid #007bff; border-radius:5px; display:none; margin-top:5px;">
+  </textarea>
 </div>
+
 
 <div id="upcomingPanel">
   <h4>⏰ 순찰 후 순찰완료 요망</h4>
@@ -355,4 +366,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
