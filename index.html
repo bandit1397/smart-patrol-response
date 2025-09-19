@@ -167,7 +167,25 @@ function showUpcomingPatrols(){
       const id=item.task.id;
       if(!lampData[id]){ alert("해당 ID의 좌표 정보가 없습니다."); return; }
       const pos=parseCoords(lampData[id].좌표);
+
+      // ✅ 1. 카카오 길찾기 열기
       window.open(`https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`,"_blank");
+
+      // ✅ 2. 완료버튼 표시 (순찰완료는 사용자가 직접 눌러야만 실행됨)
+      const completeDiv = document.createElement("div");
+      completeDiv.innerHTML = `
+        <div style="padding:10px; background:#fffae6; border:1px solid #ccc; margin:5px;">
+          <strong>${item.task.id}</strong> 순찰을 완료하시겠습니까?
+          <button id="forceCompleteBtn">✅ 순찰완료</button>
+        </div>
+      `;
+      document.body.prepend(completeDiv);
+
+      document.getElementById("forceCompleteBtn").addEventListener("click", () => {
+        completePatrol();   // 👉 localStorage 기록 + 리스트 업데이트
+        alert("✅ 순찰완료 처리되었습니다.");
+        location.reload();  // 👉 자동 초기화면 복귀
+      });
     };
     list.appendChild(li);
   });
@@ -354,6 +372,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
