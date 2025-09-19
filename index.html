@@ -64,25 +64,9 @@
   <button id="logToggleBtn" onclick="toggleLogViewer()">📋 순찰로그</button>
   <button id="navigateBtn" onclick="navigateToPatrol()">📍 길찾기</button>
   </div>
-
 <div id="upcomingPanel">
   <h4>⏰ 순찰 후 순찰완료 요망</h4>
   <ul id="upcomingList"></ul>
-</div>
-  
-<!-- 📋 오른쪽 아래 고정형 로그 뷰어 -->
-<div id="logViewer" style="position:fixed; bottom:10px; right:10px; width:250px; 
-  background:#fff; border:1px solid #007bff; border-radius:5px; 
-  box-shadow:2px 2px 5px rgba(0,0,0,0.2); z-index:9999;">
-  <div style="background:#007bff; color:white; padding:5px; cursor:pointer;" onclick="toggleLogViewer()">
-    📋 오늘 순찰 로그 (열기/닫기)
-  </div>
-  <!-- 📋 순찰 로그 textarea -->
-  <textarea id="logContent" readonly
-  style="width:90%; max-width:350px; height:150px; font-size:14px; 
-         padding:5px; margin:5px auto; border:1px solid #007bff; 
-         border-radius:5px; display:none; resize:none; display:block;">
-  </textarea>
 </div>
   
 <div id="map"></div>
@@ -365,6 +349,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
