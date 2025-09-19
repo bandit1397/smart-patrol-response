@@ -16,17 +16,8 @@
   #map { height: 70vh; width: 100%; }
   #clickedCoords { width: 90%; max-width: 350px; padding: 8px; margin: 5px auto; border: 1px solid #007bff; background: #eef6ff; font-size: 14px; border-radius: 5px; text-align: center; }
   #copyRouteBtn { width: 90%; max-width: 350px; background: #ff9800; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
-  #completeBtn, #logToggleBtn, #navigateBtn {
-  flex: 1;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-}
-#completeBtn { background:#28a745; color:white; }
-#logToggleBtn { background:#6c757d; color:white; }
-#navigateBtn { background:#007bff; color:white; }
+  #completeBtn { background: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 90%; max-width: 350px; margin: 10px auto; display: block; }
+  #navigateBtn { background:#007bff; color:white; border:none; padding:10px; border-radius:5px; font-size:16px; cursor:pointer; width:90%; max-width:350px; margin:10px auto; display:block; }
   #upcomingPanel { position: fixed; top: 10px; right: 10px; width: 250px; max-height: 60vh; overflow-y: auto; background: rgba(255,255,255,0.95); border: 1px solid #007bff; border-radius: 5px; padding: 10px; font-size: 14px; z-index: 9999; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); transition: all 0.3s ease; cursor: pointer; }
   #upcomingPanel h4 { margin: 0 0 5px; font-size: 16px; color: #007bff; }
   #upcomingList { list-style: none; padding: 0; margin: 0; }
@@ -59,19 +50,27 @@
     <div id="clickedCoords">📍</div>
     <button id="copyRouteBtn">📋 위치 url 복사</button>
   </div>
-  <div style="display:flex; justify-content:center; gap:5px; max-width:350px; margin:10px auto;">
-  <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
-  <button id="logToggleBtn" onclick="toggleLogViewer()">📋 순찰로그</button>
-  <button id="navigateBtn" onclick="navigateToPatrol()">📍 길찾기</button>
+  <div style="display:flex; justify-content:center; gap:10px; max-width:350px; margin:10px auto;">
+    <button id="completeBtn" onclick="completePatrol()">✅ 순찰 완료</button>
+    <button id="navigateBtn" onclick="navigateToPatrol()">📍 길찾기</button>
+  </div>
 </div>
 
-<!-- 순찰 로그 textarea -->
-<textarea id="logContent" 
-          style="display:none; width:90%; max-width:350px; height:150px; margin:10px auto; padding:8px; border:1px solid #007bff; border-radius:5px; font-size:14px; white-space:pre-wrap; overflow-y:auto;"></textarea>
-  
 <div id="upcomingPanel">
   <h4>⏰ 순찰 후 순찰완료 요망</h4>
   <ul id="upcomingList"></ul>
+</div>
+  
+<!-- 📋 오른쪽 아래 고정형 로그 뷰어 -->
+<div id="logViewer" style="position:fixed; bottom:10px; right:10px; width:250px; 
+  background:#fff; border:1px solid #007bff; border-radius:5px; 
+  box-shadow:2px 2px 5px rgba(0,0,0,0.2); z-index:9999;">
+  <div style="background:#007bff; color:white; padding:5px; cursor:pointer;" onclick="toggleLogViewer()">
+    📋 오늘 순찰 로그 (열기/닫기)
+  </div>
+  <textarea id="logContent" readonly
+    style="width:100%; height:150px; font-size:14px; padding:5px; border:none; resize:none; display:none;">
+  </textarea>
 </div>
   
 <div id="map"></div>
@@ -330,6 +329,8 @@ function toggleLogViewer(){
   if(logContent.style.display==="none" || logContent.style.display===""){
     const todayKey="patrol_text_log_" + new Date().toISOString().slice(0,10);
     const allLogs = localStorage.getItem(todayKey) || "";
+
+    // ✅ 오늘 날짜 문자열만 필터링
     const todayDateStr = new Date().toLocaleDateString("ko-KR"); 
     const filteredLogs = allLogs
       .split("\n")
@@ -354,22 +355,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
