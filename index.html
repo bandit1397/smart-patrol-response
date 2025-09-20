@@ -171,13 +171,23 @@ function showUpcomingPatrols(){
       }
       const pos = parseCoords(lampData[id].좌표);
 
-      // ✅ 순찰 완료 여부 먼저 확인
       if (confirm("📍 순찰 길찾기를 실행하시겠습니까?\n(확인 시 길찾기 실행 + 순찰완료 처리)")) {
-        window.open(
-          `https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`,
-          "_blank"
-        );
+        // ✅ 먼저 빈 창을 띄운 뒤 주소 지정
+        const popup = window.open("about:blank");
+        popup.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`;
+    
+        // ✅ 순찰 완료 처리
         completePatrol();
+
+        // ✅ 팝업 닫힘 감지
+        const checkPopup = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkPopup);
+            alert("카카오맵 창이 닫혔습니다. 초기 화면으로 돌아갑니다.");
+            resetSearch(); // 지도, 검색, 클릭 좌표 초기화
+            updatePatrolDisplay(); // 예정 목록 갱신
+          }
+        }, 500);
       }
     };
     list.appendChild(li);
@@ -365,4 +375,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
