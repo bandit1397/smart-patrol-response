@@ -171,18 +171,16 @@ function showUpcomingPatrols(){
       }
       const pos = parseCoords(lampData[id].좌표);
 
-      // ✅ 카카오맵 길찾기 실행
-      window.open(
-        `https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`,
-        "_blank"
-      );
+      // ✅ 먼저 빈 창을 띄운다
+      const popup = window.open("about:blank");
 
-      // ✅ 길찾기 창을 연 직후 confirm 실행 (지연)
-      setTimeout(() => {
-        if (confirm("📍 순찰 길찾기를 실행했습니다.\n이 순찰을 완료 처리하시겠습니까?")) {
-          completePatrol();
-        }
-      }, 300); // 0~300ms 정도 지연 주면 안정적
+      // ✅ 새 창에 카카오맵 길찾기 주소를 설정한다
+      popup.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`;
+
+      // ✅ 길찾기 실행 후 순찰완료 여부 확인
+      if (confirm("📍 순찰 길찾기를 실행했습니다.\n이 순찰을 완료 처리하시겠습니까?")) {
+        completePatrol();
+      }
     };
     list.appendChild(li);
   });
@@ -369,6 +367,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
