@@ -162,12 +162,33 @@ function showUpcomingPatrols(){
     const li=document.createElement("li");
     li.style.color = item.isInTime ? "blue" : "black";
     li.textContent = `${item.task.id} - ${pad(item.hour)}:${pad(item.minute)}~${pad(item.endHour)}:${pad(item.endMinute)}`;
-    li.onclick=()=>{
-      activePatrol={task:item.task,hour:item.hour,minute:item.minute,key:item.key};
-      const id=item.task.id;
-      if(!lampData[id]){ alert("해당 ID의 좌표 정보가 없습니다."); return; }
-      const pos=parseCoords(lampData[id].좌표);
-      window.open(`https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`,"_blank");
+    li.onclick = () => {
+      activePatrol = {task:item.task,hour:item.hour,minute:item.minute,key:item.key};
+      const id = item.task.id;
+      if (!lampData[id]) {
+        alert("해당 ID의 좌표 정보가 없습니다.");
+        return;
+      }
+      const pos = parseCoords(lampData[id].좌표);
+
+      if (confirm("📍 순찰 길찾기를 실행하시겠습니까?\n(확인 시 길찾기 실행 + 순찰완료 처리)")) {
+        // ✅ 먼저 빈 창을 띄운 뒤 주소 지정
+        const popup = window.open("about:blank");
+        popup.location.href = `https://map.kakao.com/link/to/${encodeURIComponent(item.task.id)},${pos.lat},${pos.lng}`;
+    
+        // ✅ 순찰 완료 처리
+        completePatrol();
+
+        // ✅ 팝업 닫힘 감지
+        const checkPopup = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkPopup);
+            alert("카카오맵 창이 닫혔습니다. 초기 화면으로 돌아갑니다.");
+            resetSearch(); // 지도, 검색, 클릭 좌표 초기화
+            updatePatrolDisplay(); // 예정 목록 갱신
+          }
+        }, 250);
+      }
     };
     list.appendChild(li);
   });
@@ -354,3 +375,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
+
