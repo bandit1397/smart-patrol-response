@@ -230,18 +230,37 @@ function addMarker(id, pos, color){
 
     // 이전 클릭 마커가 있으면 원래 색으로 복원
     if (lastClickedMarker && lastClickedMarker !== m) {
-      lastClickedMarker.setIcon(defaultIcon);
+        lastClickedMarker.setIcon(defaultIcon);
     }
     lastClickedMarker = m;
 
     // 클릭 좌표 업데이트
     lastClickedCoord = lampData[id].좌표;
     document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
-  });
 
-  markerCluster.addLayer(m);
-  markers.push(m);
-}
+    // ✅ 바로 카카오맵 길찾기 실행
+    const [lat, lng] = lastClickedCoord.split(",");
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            const startLat = pos.coords.latitude.toFixed(6);
+            const startLng = pos.coords.longitude.toFixed(6);
+            const appUrl = `kakaomap://route?sp=${startLat},${startLng}&ep=${lat},${lng}&by=CAR`;
+            const webUrl = `https://map.kakao.com/link/to/선택위치,${lat},${lng}`;
+            if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
+                window.location.href = appUrl;
+                setTimeout(()=>window.open(webUrl,"_blank"),1500);
+            } else {
+                window.open(webUrl,"_blank");
+            }
+        }, () => {
+            // 위치 못 가져오면 웹으로 이동
+            window.open(`https://map.kakao.com/link/to/선택위치,${lat},${lng}`,"_blank");
+        });
+    } else {
+        window.open(`https://map.kakao.com/link/to/선택위치,${lat},${lng}`,"_blank");
+    }
+});
+
 
 // 클릭 좌표 → 카카오맵 URL 복사
 document.getElementById("copyRouteBtn").addEventListener("click",()=>{
@@ -374,6 +393,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
