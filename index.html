@@ -230,37 +230,18 @@ function addMarker(id, pos, color){
 
     // 이전 클릭 마커가 있으면 원래 색으로 복원
     if (lastClickedMarker && lastClickedMarker !== m) {
-        lastClickedMarker.setIcon(defaultIcon);
+      lastClickedMarker.setIcon(defaultIcon);
     }
     lastClickedMarker = m;
 
     // 클릭 좌표 업데이트
     lastClickedCoord = lampData[id].좌표;
     document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
+  });
 
-    // ✅ 바로 카카오맵 길찾기 실행
-    const [lat, lng] = lastClickedCoord.split(",");
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            const startLat = pos.coords.latitude.toFixed(6);
-            const startLng = pos.coords.longitude.toFixed(6);
-            const appUrl = `kakaomap://route?sp=${startLat},${startLng}&ep=${lat},${lng}&by=CAR`;
-            const webUrl = `https://map.kakao.com/link/to/선택위치,${lat},${lng}`;
-            if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
-                window.location.href = appUrl;
-                setTimeout(()=>window.open(webUrl,"_blank"),1500);
-            } else {
-                window.open(webUrl,"_blank");
-            }
-        }, () => {
-            // 위치 못 가져오면 웹으로 이동
-            window.open(`https://map.kakao.com/link/to/선택위치,${lat},${lng}`,"_blank");
-        });
-    } else {
-        window.open(`https://map.kakao.com/link/to/선택위치,${lat},${lng}`,"_blank");
-    }
-});
-
+  markerCluster.addLayer(m);
+  markers.push(m);
+}
 
 // 클릭 좌표 → 카카오맵 URL 복사
 document.getElementById("copyRouteBtn").addEventListener("click",()=>{
@@ -299,20 +280,55 @@ function searchAndShow() {
 function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; }
 
 function navigateToPatrol(){
-  if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); return; }
+  if(!lastClickedCoord){ 
+    alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); 
+    return; 
+  }
   const [destLat,destLng]=lastClickedCoord.split(",");
+
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
-      const startLat=pos.coords.latitude.toFixed(6), startLng=pos.coords.longitude.toFixed(6);
+      const startLat=pos.coords.latitude.toFixed(6);
+      const startLng=pos.coords.longitude.toFixed(6);
+
       const appUrl=`kakaomap://route?sp=${startLat},${startLng}&ep=${destLat},${destLng}&by=CAR`;
       const webUrl=`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`;
+
+      // 모바일인지 체크
       if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
-        window.location.href=appUrl;
-        setTimeout(()=>window.open(webUrl,"_blank"),1500);
-      } else { window.open(webUrl,"_blank"); }
-    },()=>{ alert("현위치를 가져올 수 없습니다. 웹으로 이동합니다."); window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); });
-  } else { window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); }
+        let appOpened = false;
+
+        // 앱 실행 시도
+        const timeout = setTimeout(() => {
+          if(!appOpened) window.open(webUrl, "_blank"); // 앱 실패 시 웹 fallback
+        }, 1500);
+
+        // 페이지 visibility 변화로 앱 실행 감지
+        const handleVisibilityChange = () => {
+          if(document.hidden){
+            appOpened = true;
+            clearTimeout(timeout);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+          }
+        };
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        // 앱 호출
+        window.location.href = appUrl;
+      } else { 
+        // PC/웹
+        window.open(webUrl, "_blank"); 
+      }
+    },()=>{
+      alert("⚠️ 현위치를 가져올 수 없습니다. 웹으로 이동합니다."); 
+      window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); 
+    });
+  } else { 
+    // Geolocation 지원 안 됨
+    window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); 
+  }
 }
+
 
 function completePatrol(){
   if(!activePatrol){ return; }
@@ -393,8 +409,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
