@@ -284,46 +284,50 @@ function navigateToPatrol(){
     alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); 
     return; 
   }
-  const [destLat,destLng]=lastClickedCoord.split(",");
+  const [destLat,destLng] = lastClickedCoord.split(",");
 
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition(pos=>{
       const startLat=pos.coords.latitude.toFixed(6);
       const startLng=pos.coords.longitude.toFixed(6);
 
-      const appUrl=`kakaomap://route?sp=${startLat},${startLng}&ep=${destLat},${destLng}&by=CAR`;
-      const webUrl=`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`;
+      const appUrl = `kakaomap://route?sp=${startLat},${startLng}&ep=${destLat},${destLng}&by=CAR`;
+      const webUrl = `https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`;
 
-      // 모바일인지 체크
       if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
-        let appOpened = false;
+        let attempts = 0;
+        const maxAttempts = 5; // 최대 재시도 횟수
+        const interval = 2000; // 2초 간격
 
-        // 앱 실행 시도
-        const timeout = setTimeout(() => {
-          if(!appOpened) window.open(webUrl, "_blank"); // 앱 실패 시 웹 fallback
-        }, 1500);
+        const tryOpenApp = () => {
+          attempts++;
+          window.location.href = appUrl;
 
-        // 페이지 visibility 변화로 앱 실행 감지
-        const handleVisibilityChange = () => {
-          if(document.hidden){
-            appOpened = true;
-            clearTimeout(timeout);
-            document.removeEventListener("visibilitychange", handleVisibilityChange);
-          }
+          // 1.5초 후 visibility 체크
+          const timeout = setTimeout(() => {
+            if(document.hidden){
+              // 앱 열림 감지
+              clearTimeout(timeout);
+            } else if(attempts < maxAttempts){
+              // 아직 앱 안 열렸으면 재시도
+              tryOpenApp();
+            } else {
+              // 최대 시도 후 fallback
+              window.open(webUrl, "_blank");
+            }
+          }, 1500);
         };
-        document.addEventListener("visibilitychange", handleVisibilityChange);
 
-        // 앱 호출
-        window.location.href = appUrl;
-      } else { 
+        tryOpenApp(); // 최초 시도
+      } else {
         // PC/웹
-        window.open(webUrl, "_blank"); 
+        window.open(webUrl, "_blank");
       }
     },()=>{
       alert("⚠️ 현위치를 가져올 수 없습니다. 웹으로 이동합니다."); 
       window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); 
     });
-  } else { 
+  } else {
     // Geolocation 지원 안 됨
     window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); 
   }
@@ -409,3 +413,4 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
