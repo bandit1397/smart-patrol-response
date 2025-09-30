@@ -296,31 +296,44 @@ function navigateToPatrol(){
 
       if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
         let attempts = 0;
-        const maxAttempts = 5; // 최대 재시도 횟수
-        const interval = 2000; // 2초 간격
+        const maxAttempts = 5;   // 최대 5회 재시도
+        const interval = 2000;   // 2초 간격
 
+        // ✅ iframe 방식 병행 → 앱 호출 안정성 강화
+        let iframe;
         const tryOpenApp = () => {
           attempts++;
+          // window.location 직접 시도
           window.location.href = appUrl;
 
-          // 1.5초 후 visibility 체크
+          // iframe 시도 병행
+          if(!iframe){
+            iframe = document.createElement("iframe");
+            iframe.style.display="none";
+            iframe.src = appUrl;
+            document.body.appendChild(iframe);
+          } else {
+            iframe.src = appUrl; // 재시도마다 src 갱신
+          }
+
+          // 1.5초 후 앱 실행 여부 체크
           const timeout = setTimeout(() => {
             if(document.hidden){
-              // 앱 열림 감지
+              // 앱이 정상적으로 열림
               clearTimeout(timeout);
             } else if(attempts < maxAttempts){
               // 아직 앱 안 열렸으면 재시도
               tryOpenApp();
             } else {
-              // 최대 시도 후 fallback
+              // 최대 시도 후에도 실패 → 웹으로 fallback
               window.open(webUrl, "_blank");
             }
           }, 1500);
         };
 
-        tryOpenApp(); // 최초 시도
+        tryOpenApp(); // 최초 호출
       } else {
-        // PC/웹
+        // PC 환경 → 바로 웹 링크
         window.open(webUrl, "_blank");
       }
     },()=>{
@@ -328,10 +341,11 @@ function navigateToPatrol(){
       window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); 
     });
   } else {
-    // Geolocation 지원 안 됨
+    // Geolocation 미지원 → 웹으로 fallback
     window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); 
   }
 }
+
 
 
 function completePatrol(){
@@ -413,4 +427,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
