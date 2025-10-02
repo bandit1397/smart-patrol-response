@@ -286,11 +286,9 @@ function navigateToPatrol() {
   }
   const [destLat, destLng] = lastClickedCoord.split(",");
 
-  // 지도 표시 URL (웹으로만 열기)
+  // ✅ 항상 웹 URL로만 열기
   const mapUrl = `https://map.kakao.com/link/map/선택위치,${destLat},${destLng}`;
-
-  // 항상 현재 탭에서 열기
-  window.location.href = mapUrl;
+  window.open(mapUrl, "_blank");
 }
 
 
@@ -375,6 +373,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
