@@ -286,11 +286,17 @@ function navigateToPatrol() {
   }
   const [destLat, destLng] = lastClickedCoord.split(",");
 
-  // ✅ 검색 기반 URL (앱 팝업 차단)
-  const mapUrl = `https://map.kakao.com/?q=${destLat},${destLng}`;
-  window.location.href = mapUrl; // 현재 탭에서 열기
-}
+  // 지도 표시 URL (앱 설치 시 카카오맵 앱으로, 미설치 시 웹으로 열림)
+  const mapUrl = `https://map.kakao.com/link/map/선택위치,${destLat},${destLng}`;
 
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    // 모바일 환경 → 지도 표시 URL 우선 열기
+    window.location.href = mapUrl;
+  } else {
+    // PC 환경 → 새 탭에서 지도 표시
+    window.open(mapUrl, "_blank");
+  }
+}
 
 
 
@@ -374,10 +380,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
