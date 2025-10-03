@@ -286,10 +286,11 @@ function navigateToPatrol() {
   }
   const [destLat, destLng] = lastClickedCoord.split(",");
 
-  // ✅ 항상 웹 URL로만 열기
-  const mapUrl = `https://map.kakao.com/link/map/선택위치,${destLat},${destLng}`;
-  window.open(mapUrl, "_blank");
+  // ✅ 검색 기반 URL (앱 팝업 차단)
+  const mapUrl = `https://map.kakao.com/?q=${destLat},${destLng}`;
+  window.location.href = mapUrl; // 현재 탭에서 열기
 }
+
 
 
 
@@ -373,6 +374,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
