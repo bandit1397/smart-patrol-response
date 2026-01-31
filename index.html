@@ -85,6 +85,9 @@ let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let lastClickedMarker = null;
 
+let gpxTrackLayer = null;
+let gpxWptLayer = null;
+
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
   updatePatrolDisplay();
@@ -382,4 +385,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
