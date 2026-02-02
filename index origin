@@ -31,6 +31,8 @@
 <script src="patrolSchedule.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet-gpx@1.7.0/gpx.js"></script>
+
 </head>
 <body>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
@@ -82,6 +84,14 @@ let map, markers = [], markerCluster;
 let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let lastClickedMarker = null;
+
+/* 🔴 여기 추가 */
+const ROUTE_GPX_FILES = [
+  "routes/patrol_2025-11-24_minimal.gpx",
+  "routes/ge_park.gpx"
+];
+let gpxLayerGroup; // GPX 레이어 묶음
+/* 🔴 여기까지 */
 
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
@@ -200,6 +210,32 @@ function initMap(){
   markerCluster = L.markerClusterGroup();
   map.addLayer(markerCluster);
 
+  gpxLayerGroup = L.layerGroup().addTo(map);
+
+  // ✅ routes/ 의 GPX 파일들을 지도에 트랙으로 표시
+  ROUTE_GPX_FILES.forEach((url) => {
+    new L.GPX(url, {
+      async: true,
+      polyline_options: {
+        color: "#ff0000",
+        weight: 4,
+        opacity: 0.85
+      },
+      marker_options: {
+        startIconUrl: null,
+        endIconUrl: null,
+        shadowUrl: null
+      }
+    })
+    .on("loaded", function (e) {
+      // map.fitBounds(e.target.getBounds()); // 필요 시 활성화
+    })
+    .on("error", function () {
+      console.warn("GPX 로드 실패:", url);
+    })
+    .addTo(gpxLayerGroup);
+  });
+
   map.on("click", e=>{
     if(searchMode) return;
     lastClickedCoord = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
@@ -279,21 +315,27 @@ function searchAndShow() {
 
 function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; }
 
-function navigateToPatrol(){
-  if(!lastClickedCoord){ alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요."); return; }
-  const [destLat,destLng]=lastClickedCoord.split(",");
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(pos=>{
-      const startLat=pos.coords.latitude.toFixed(6), startLng=pos.coords.longitude.toFixed(6);
-      const appUrl=`kakaomap://route?sp=${startLat},${startLng}&ep=${destLat},${destLng}&by=CAR`;
-      const webUrl=`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`;
-      if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
-        window.location.href=appUrl;
-        setTimeout(()=>window.open(webUrl,"_blank"),1500);
-      } else { window.open(webUrl,"_blank"); }
-    },()=>{ alert("현위치를 가져올 수 없습니다. 웹으로 이동합니다."); window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); });
-  } else { window.open(`https://map.kakao.com/link/to/선택위치,${destLat},${destLng}`,"_blank"); }
+function navigateToPatrol() {
+  if (!lastClickedCoord) {
+    alert("⚠️ 먼저 지도를 클릭하여 목적지를 선택하세요.");
+    return;
+  }
+  const [destLat, destLng] = lastClickedCoord.split(",");
+
+  // 지도 표시 URL (앱 설치 시 카카오맵 앱으로, 미설치 시 웹으로 열림)
+  const mapUrl = `https://map.kakao.com/link/map/선택위치,${destLat},${destLng}`;
+
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    // 모바일 환경 → 지도 표시 URL 우선 열기
+    window.location.href = mapUrl;
+  } else {
+    // PC 환경 → 새 탭에서 지도 표시
+    window.open(mapUrl, "_blank");
+  }
 }
+
+
+
 
 function completePatrol(){
   if(!activePatrol){ return; }
@@ -374,6 +416,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
+
+
+
 
 
 
