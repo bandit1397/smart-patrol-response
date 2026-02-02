@@ -85,6 +85,14 @@ let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let lastClickedMarker = null;
 
+/* 🔴 여기 추가 */
+const ROUTE_GPX_FILES = [
+  "routes/route1.gpx",
+  "routes/route2.gpx"
+];
+let gpxLayerGroup; // GPX 레이어 묶음
+/* 🔴 여기까지 */
+
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
   updatePatrolDisplay();
@@ -382,4 +390,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
