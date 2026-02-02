@@ -31,8 +31,6 @@
 <script src="patrolSchedule.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-<script src="https://unpkg.com/leaflet-gpx/gpx.js"></script>
-
 </head>
 <body>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
@@ -84,88 +82,6 @@ let map, markers = [], markerCluster;
 let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let lastClickedMarker = null;
-
-let gpxTrackLayer = null;
-let gpxWptLayer = null;
-
-function clearGpx(){
-  if (gpxTrackLayer) { map.removeLayer(gpxTrackLayer); gpxTrackLayer = null; }
-  if (gpxWptLayer)   { map.removeLayer(gpxWptLayer);   gpxWptLayer = null; }
-}
-
-// GPX 텍스트에서 wpt 파싱 → 마커 표시
-function addWptMarkersFromGpxText(gpxText){
-  const parser = new DOMParser();
-  const xml = parser.parseFromString(gpxText, "application/xml");
-  const wpts = Array.from(xml.getElementsByTagName("wpt"));
-  if (wpts.length === 0) return;
-
-  gpxWptLayer = L.layerGroup().addTo(map);
-
-  const icon = L.icon({
-    iconUrl: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
-    iconSize: [32, 32]
-  });
-
-  wpts.forEach(wpt=>{
-    const lat = parseFloat(wpt.getAttribute("lat"));
-    const lon = parseFloat(wpt.getAttribute("lon"));
-    const nameNode = wpt.getElementsByTagName("name")[0];
-    const timeNode = wpt.getElementsByTagName("time")[0];
-    const name = nameNode ? nameNode.textContent : "GPX-WPT";
-    const time = timeNode ? timeNode.textContent : "";
-
-    const m = L.marker([lat, lon], { icon }).addTo(gpxWptLayer);
-    m.bindPopup(`<strong>${name}</strong><br/>${time ? "시간: " + time : ""}`);
-
-    // ✅ 기존 기능과 연결: 클릭하면 길찾기/복사 대상 좌표로 세팅
-    m.on("click", ()=>{
-      lastClickedCoord = `${lat.toFixed(6)},${lon.toFixed(6)}`;
-      document.getElementById("clickedCoords").innerText = `📍 선택: ${lastClickedCoord}`;
-    });
-  });
-}
-
-// routes/xxx.gpx 로드 → 트랙+웨이포인트 표시
-async function loadGpxFromUrl(url){
-  clearGpx();
-
-  try{
-    const res = await fetch(url, { cache: "no-store" });
-    console.log("[GPX] fetch:", url, res.status);
-    if(!res.ok) throw new Error("HTTP " + res.status);
-
-    let text = await res.text();
-
-    // ✅ BOM 제거 (U+FEFF)
-    text = text.replace(/^\uFEFF/, "");
-
-    // (선택) XML 선언 앞에 공백/줄바꿈이 섞여있으면 제거
-    text = text.replace(/^\s+(?=<\?xml)/, "");
-
-    // ✅ 트랙도 '텍스트'로 로딩 (URL 파싱 문제 회피)
-    gpxTrackLayer = new L.GPX(text, { async: true })
-      .on("loaded", (e)=>{
-        console.log("[GPX] loaded(text):", url);
-        try { map.fitBounds(e.target.getBounds()); } catch(err){}
-      })
-      .on("error", (e)=>{
-        console.error("[GPX] track parse error(text):", url, e);
-        alert("GPX 트랙 파싱 실패: 콘솔 확인");
-      })
-      .addTo(map);
-
-    // ✅ WPT는 기존 방식 그대로 (텍스트 기반)
-    addWptMarkersFromGpxText(text);
-
-  }catch(err){
-    console.error("[GPX] load error:", err);
-    alert("GPX 로드 실패: " + err.message);
-  }
-}
-
-
-
 
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
@@ -460,14 +376,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
   });
   initMap(); 
   updatePatrolDisplay();
-  loadGpxFromUrl("routes/patrol_2025-11-24.gpx");
 });
 </script>
 </body>
 </html>
-
-
-
-
-
-
