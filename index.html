@@ -210,6 +210,54 @@ function initMap(){
   });
 }
 
+  // ✅ GPX 경로 표시 (routes 폴더의 gpx 파일)
+  const gpxPath = "./routes/Track_2025-11-24_1439.gpx"; // ← 파일명에 맞게 수정
+  new L.GPX(gpxPath, {
+    async: true,
+    polyline_options: {
+      color: "#ff0000",
+      weight: 4,
+      opacity: 0.9
+    },
+    marker_options: {
+      startIconUrl: null,
+      endIconUrl: null,
+      shadowUrl: null
+    }
+  })
+  .on("loaded", function(e) {
+    // GPX가 로드되면 화면을 경로 범위로 맞춤 (원치 않으면 이 줄 삭제)
+    map.fitBounds(e.target.getBounds());
+  })
+  .on("error", function(err) {
+    console.error("GPX 로드 실패:", err);
+  })
+  .addTo(map);
+  // ✅ GPX 경로 표시 (routes 폴더의 gpx 파일)
+  const gpxPath = "./routes/Track_2025-11-24_1439.gpx"; // ← 파일명에 맞게 수정
+  new L.GPX(gpxPath, {
+    async: true,
+    polyline_options: {
+      color: "#ff0000",
+      weight: 4,
+      opacity: 0.9
+    },
+    marker_options: {
+      startIconUrl: null,
+      endIconUrl: null,
+      shadowUrl: null
+    }
+  })
+  .on("loaded", function(e) {
+    // GPX가 로드되면 화면을 경로 범위로 맞춤 (원치 않으면 이 줄 삭제)
+    map.fitBounds(e.target.getBounds());
+  })
+  .on("error", function(err) {
+    console.error("GPX 로드 실패:", err);
+  })
+  .addTo(map);
+
+
 function clearMarkers(){ markerCluster.clearLayers(); markers=[]; }
 
 function addMarker(id, pos, color){
@@ -381,4 +429,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
