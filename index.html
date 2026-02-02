@@ -130,18 +130,34 @@ function addWptMarkersFromGpxText(gpxText){
 async function loadGpxFromUrl(url){
   clearGpx();
 
-  // 1) 트랙(경로 라인)
+  // 트랙
   gpxTrackLayer = new L.GPX(url, { async: true })
     .on("loaded", (e)=>{
+      console.log("[GPX] loaded:", url);
       try { map.fitBounds(e.target.getBounds()); } catch(err){}
+    })
+    .on("error", (e)=>{
+      console.error("[GPX] track parse error:", url, e);
     })
     .addTo(map);
 
-  // 2) wpt(웨이포인트)
-  const res = await fetch(url);
-  const text = await res.text();
-  addWptMarkersFromGpxText(text);
+  // WPT
+  try{
+    const res = await fetch(url, { cache: "no-store" });
+    console.log("[GPX] fetch:", url, res.status);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+
+    let text = await res.text();
+
+    // ✅ BOM 제거 (GPS Visualizer GPX에서 자주 걸림)
+    text = text.replace(/^\uFEFF/, "");
+
+    addWptMarkersFromGpxText(text);
+  }catch(err){
+    console.error("[GPX] wpt fetch/parse error:", err);
+  }
 }
+
 
 
 function setActiveCategories(selectedCategories){
@@ -442,6 +458,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
