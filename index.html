@@ -130,18 +130,6 @@ function addWptMarkersFromGpxText(gpxText){
 async function loadGpxFromUrl(url){
   clearGpx();
 
-  // 트랙
-  gpxTrackLayer = new L.GPX(url, { async: true })
-    .on("loaded", (e)=>{
-      console.log("[GPX] loaded:", url);
-      try { map.fitBounds(e.target.getBounds()); } catch(err){}
-    })
-    .on("error", (e)=>{
-      console.error("[GPX] track parse error:", url, e);
-    })
-    .addTo(map);
-
-  // WPT
   try{
     const res = await fetch(url, { cache: "no-store" });
     console.log("[GPX] fetch:", url, res.status);
@@ -149,14 +137,33 @@ async function loadGpxFromUrl(url){
 
     let text = await res.text();
 
-    // ✅ BOM 제거 (GPS Visualizer GPX에서 자주 걸림)
+    // ✅ BOM 제거 (U+FEFF)
     text = text.replace(/^\uFEFF/, "");
 
+    // (선택) XML 선언 앞에 공백/줄바꿈이 섞여있으면 제거
+    text = text.replace(/^\s+(?=<\?xml)/, "");
+
+    // ✅ 트랙도 '텍스트'로 로딩 (URL 파싱 문제 회피)
+    gpxTrackLayer = new L.GPX(text, { async: true })
+      .on("loaded", (e)=>{
+        console.log("[GPX] loaded(text):", url);
+        try { map.fitBounds(e.target.getBounds()); } catch(err){}
+      })
+      .on("error", (e)=>{
+        console.error("[GPX] track parse error(text):", url, e);
+        alert("GPX 트랙 파싱 실패: 콘솔 확인");
+      })
+      .addTo(map);
+
+    // ✅ WPT는 기존 방식 그대로 (텍스트 기반)
     addWptMarkersFromGpxText(text);
+
   }catch(err){
-    console.error("[GPX] wpt fetch/parse error:", err);
+    console.error("[GPX] load error:", err);
+    alert("GPX 로드 실패: " + err.message);
   }
 }
+
 
 
 
@@ -458,6 +465,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
