@@ -201,62 +201,43 @@ function initMap(){
   markerCluster = L.markerClusterGroup();
   map.addLayer(markerCluster);
 
+  // ✅ GPX 경로 표시 (routes 폴더의 gpx 파일) - initMap() 안에서 1번만 실행
+  const gpxPath = "./routes/Track_2025-11-24_1439.gpx"; // 파일명 정확히!
+  new L.GPX(gpxPath, {
+    async: true,
+    polyline_options: {
+      color: "#ff0000",
+      weight: 4,
+      opacity: 0.9
+    },
+    marker_options: {
+      startIconUrl: null,
+      endIconUrl: null,
+      shadowUrl: null
+    }
+  })
+  .on("loaded", function(e) {
+    // GPX가 로드되면 화면을 경로 범위로 맞춤 (원치 않으면 아래 줄 삭제)
+    map.fitBounds(e.target.getBounds());
+  })
+  .on("error", function(err) {
+    console.error("GPX 로드 실패:", err);
+  })
+  .addTo(map);
+
   map.on("click", e=>{
     if(searchMode) return;
     lastClickedCoord = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
     document.getElementById("clickedCoords").innerText = `📍 클릭 좌표: ${lastClickedCoord}`;
     if(window.lastClickMarker) markerCluster.removeLayer(window.lastClickMarker);
-    window.lastClickMarker = L.marker(e.latlng, { icon: L.icon({iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png", iconSize:[32,32]}) }).addTo(markerCluster);
+    window.lastClickMarker = L.marker(e.latlng, {
+      icon: L.icon({
+        iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+        iconSize:[32,32]
+      })
+    }).addTo(markerCluster);
   });
 }
-
-  // ✅ GPX 경로 표시 (routes 폴더의 gpx 파일)
-  const gpxPath = "./routes/Track_2025-11-24_1439.gpx"; // ← 파일명에 맞게 수정
-  new L.GPX(gpxPath, {
-    async: true,
-    polyline_options: {
-      color: "#ff0000",
-      weight: 4,
-      opacity: 0.9
-    },
-    marker_options: {
-      startIconUrl: null,
-      endIconUrl: null,
-      shadowUrl: null
-    }
-  })
-  .on("loaded", function(e) {
-    // GPX가 로드되면 화면을 경로 범위로 맞춤 (원치 않으면 이 줄 삭제)
-    map.fitBounds(e.target.getBounds());
-  })
-  .on("error", function(err) {
-    console.error("GPX 로드 실패:", err);
-  })
-  .addTo(map);
-  // ✅ GPX 경로 표시 (routes 폴더의 gpx 파일)
-  const gpxPath = "./routes/Track_2025-11-24_1439.gpx"; // ← 파일명에 맞게 수정
-  new L.GPX(gpxPath, {
-    async: true,
-    polyline_options: {
-      color: "#ff0000",
-      weight: 4,
-      opacity: 0.9
-    },
-    marker_options: {
-      startIconUrl: null,
-      endIconUrl: null,
-      shadowUrl: null
-    }
-  })
-  .on("loaded", function(e) {
-    // GPX가 로드되면 화면을 경로 범위로 맞춤 (원치 않으면 이 줄 삭제)
-    map.fitBounds(e.target.getBounds());
-  })
-  .on("error", function(err) {
-    console.error("GPX 로드 실패:", err);
-  })
-  .addTo(map);
-
 
 function clearMarkers(){ markerCluster.clearLayers(); markers=[]; }
 
@@ -429,5 +410,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
