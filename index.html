@@ -223,31 +223,41 @@ function initMap(){
         opacity: 0.85
       },
       marker_options: {
-        // ✅ 트랙 시작/끝 마커는 기존처럼 숨김 유지
         startIconUrl: null,
         endIconUrl: null,
         shadowUrl: null,
 
-        // ✅ (추가) wpt를 "마커 아이콘"으로 표시
-        // <sym>가 없는 wpt는 ''(빈 키) 매핑이 적용됨
+        // 기존처럼 wpt는 마커로 표시 
         wptIconUrls: {
           "": "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-        },
-
-        // (선택) 아이콘 크기/앵커를 명확히 하고 싶으면 아래도 추가 가능 (필수 아님)
-        // iconSize: [32, 32],
-        // iconAnchor: [16, 32]
+        }
       }
     })
-
     .on("loaded", function (e) {
-      // map.fitBounds(e.target.getBounds()); // 필요 시 활성화
+      const gpx = e.target;
+
+      // ✅ GPX 내 레이어들 중 Marker만 골라서 index에 저장
+      gpx.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+          // Leaflet-GPX는 wpt marker에 _name 같은 값을 붙여두는 경우가 많음
+          // 안전하게 여러 후보를 체크
+          const name =
+            layer._name ||
+            (layer.feature && layer.feature.properties && (layer.feature.properties.name || layer.feature.properties.desc)) ||
+            (layer.getTooltip && layer.getTooltip() && layer.getTooltip().getContent()) ||
+            "";
+
+          // name이 없어도 마커는 일단 넣어둠(검색용)
+          gpxWptIndex.push({ name: String(name || "").trim(), marker: layer });
+        }
+      });
     })
     .on("error", function () {
       console.warn("GPX 로드 실패:", url);
     })
     .addTo(gpxLayerGroup);
   });
+
 
   map.on("click", e=>{
     if(searchMode) return;
@@ -429,6 +439,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
