@@ -456,6 +456,17 @@ function initMap(){
 
             marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
 
+            marker.on("click", () => {
+              const ll = marker.getLatLng();
+
+              // ✅ lampData 마커와 동일한 방식으로 좌표 세팅
+              lastClickedCoord = `${ll.lat.toFixed(6)},${ll.lng.toFixed(6)}`;
+              document.getElementById("clickedCoords").innerText =
+                `📍 선택: ${lastClickedCoord}`;
+
+              // (선택) 시각적 피드백이 필요하면 여기에 아이콘 변경 가능
+            });
+
             // ✅ 검색/색변화는 새 마커 인덱스로만
             gpxNewWptIndex.push({
               name,
@@ -747,6 +758,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
