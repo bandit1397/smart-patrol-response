@@ -377,7 +377,7 @@ function searchAndShow() {
   map.fitBounds(bounds);
 }
 
-function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; }
+function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; resetGpxWptHighlight(); }
 
 function navigateToPatrol() {
   if (!lastClickedCoord) {
@@ -480,6 +480,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
