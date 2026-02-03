@@ -302,6 +302,32 @@ function initMap(){
         }
       });
 
+      // ✅ 근처 마커 찾기 (좌표가 완전히 같지 않아도 매칭)
+      function findNearestMarker(lat, lon) {
+        const targetLat = Number(lat);
+        const targetLon = Number(lon);
+
+        let best = null;
+        let bestDist = Infinity;
+
+        markerByLatLng.forEach((m) => {
+          if (!(m instanceof L.Marker)) return;
+          const ll = m.getLatLng();
+          const dLat = ll.lat - targetLat;
+          const dLon = ll.lng - targetLon;
+          const dist = dLat*dLat + dLon*dLon;
+
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = m;
+          }
+        });
+
+        // 약 수 m 이내면 같은 WPT로 간주
+        return bestDist < 1e-9 ? best : null;
+      }
+
+
       // ✅ 1) get_waypoints()가 있으면 거기서도 시도
       if (typeof gpx.get_waypoints === "function") {
         const wpts = gpx.get_waypoints() || [];
@@ -616,6 +642,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
