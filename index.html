@@ -464,8 +464,29 @@ function initMap(){
               document.getElementById("clickedCoords").innerText =
                 `📍 선택: ${lastClickedCoord}`;
 
-              // (선택) 시각적 피드백이 필요하면 여기에 아이콘 변경 가능
+              // ✅ 선택된 GPX WPT 시각적 강조 (lampData와 동일 개념)
+              const selectedIcon = L.icon({
+                iconUrl: "https://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+                iconSize: [32, 32]
+              });
+
+              // 이전에 클릭된 마커가 있으면 원래 아이콘으로 복원
+              if (lastClickedMarker && lastClickedMarker !== marker) {
+                lastClickedMarker.setIcon(
+                  lastClickedMarker._defaultIcon || blueIcon
+                );
+              }
+
+              // 현재 마커의 기본 아이콘 저장 (한 번만)
+              if (!marker._defaultIcon) {
+                marker._defaultIcon = marker.options.icon;
+              }
+
+              // 현재 마커 강조
+              marker.setIcon(selectedIcon);
+              lastClickedMarker = marker;
             });
+
 
             // ✅ 검색/색변화는 새 마커 인덱스로만
             gpxNewWptIndex.push({
@@ -758,6 +779,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
