@@ -207,7 +207,11 @@ function showUpcomingPatrols(){
 
 function initMap(){
   map = L.map('map').setView([37.3857,126.6586], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
   markerCluster = L.markerClusterGroup();
   map.addLayer(markerCluster);
 
@@ -226,8 +230,6 @@ function initMap(){
         startIconUrl: null,
         endIconUrl: null,
         shadowUrl: null,
-
-        // 기존처럼 wpt는 마커로 표시 
         wptIconUrls: {
           "": "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
         }
@@ -236,36 +238,25 @@ function initMap(){
     .on("loaded", function (e) {
       const gpx = e.target;
 
-      // ✅ (선택) 매번 누적되면 중복될 수 있으니, 필요 시 초기화
-      // gpxWptIndex = [];
-
-      // ✅ 1) 가장 확실한 방법: Leaflet-GPX가 파싱한 waypoint 목록 사용
+      // ✅ 1) 가장 확실: waypoint 목록 사용
       if (typeof gpx.get_waypoints === "function") {
         const wpts = gpx.get_waypoints() || [];
-
         wpts.forEach(w => {
-          // w.marker: Leaflet 마커
-          // w.name / w.desc: GPX <name>, <desc> 등
           if (w && w.marker) {
             const name = String(w.name || w.desc || "").trim();
-
             gpxWptIndex.push({
               name,
               marker: w.marker
             });
           }
         });
-
       } else {
-        // ✅ 2) 보험: get_waypoints()가 없는 버전이면 기존 방식으로 추출 시도
+        // ✅ 2) 보험: marker 순회로 추출
         gpx.eachLayer(layer => {
           if (layer instanceof L.Marker) {
-
-            // popup 내용에서도 name 추출 (leaflet-gpx 일부 케이스 대응)
             const popupContent =
               (layer.getPopup && layer.getPopup() && layer.getPopup().getContent()) || "";
-
-            const popupText = String(popupContent).replace(/<[^>]*>/g, ""); // HTML 제거
+            const popupText = String(popupContent).replace(/<[^>]*>/g, "");
 
             const name =
               layer._name ||
@@ -283,22 +274,25 @@ function initMap(){
           }
         });
       }
-
-      // ✅ 디버그(원하면 유지): 실제로 name이 들어오는지 확인
-      // console.log("GPX WPT index:", gpxWptIndex.length, gpxWptIndex.slice(0, 10));
     })
     .on("error", function () {
       console.warn("GPX 로드 실패:", url);
     })
     .addTo(gpxLayerGroup);
+  }); // ✅✅✅ 이 닫는 줄이 반드시 필요합니다!
 
-
+  // ✅ 이건 forEach 밖에서 실행돼야 함
   map.on("click", e=>{
     if(searchMode) return;
     lastClickedCoord = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
     document.getElementById("clickedCoords").innerText = `📍 클릭 좌표: ${lastClickedCoord}`;
     if(window.lastClickMarker) markerCluster.removeLayer(window.lastClickMarker);
-    window.lastClickMarker = L.marker(e.latlng, { icon: L.icon({iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png", iconSize:[32,32]}) }).addTo(markerCluster);
+    window.lastClickMarker = L.marker(e.latlng, {
+      icon: L.icon({
+        iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+        iconSize:[32,32]
+      })
+    }).addTo(markerCluster);
   });
 }
 
@@ -522,6 +516,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
