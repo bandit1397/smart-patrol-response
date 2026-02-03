@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
@@ -85,14 +85,15 @@ let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let lastClickedMarker = null;
 
-/* 🔴 여기 추가 */
 const ROUTE_GPX_FILES = [
   "routes/patrol_2025-11-24_minimal.gpx",
-  "routes/ge_park.gpx"
+  "routes/yaeyang_park_minimal.gpx"
 ];
 let gpxLayerGroup; // GPX 레이어 묶음
-/* 🔴 여기까지 */
 
+let gpxWptIndex = [];        // { name, marker } 목록 (GPX의 모든 wpt 마커)
+let highlightedGpxWpts = []; // 검색으로 색상 변경된 wpt 마커들 (원복용)
+ 
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
   updatePatrolDisplay();
@@ -206,7 +207,11 @@ function showUpcomingPatrols(){
 
 function initMap(){
   map = L.map('map').setView([37.3857,126.6586], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
   markerCluster = L.markerClusterGroup();
   map.addLayer(markerCluster);
 
@@ -224,24 +229,219 @@ function initMap(){
       marker_options: {
         startIconUrl: null,
         endIconUrl: null,
-        shadowUrl: null
+        shadowUrl: null,
+        wptIconUrls: {
+          "": "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+        }
       }
     })
-    .on("loaded", function (e) {
-      // map.fitBounds(e.target.getBounds()); // 필요 시 활성화
+
+    /* ✅✅ 여기부터 교체 */
+      .on("loaded", function (e) {
+      const gpx = e.target;
+
+      // ✅ WPT 이름을 "최대한 많이" 건져오는 헬퍼 (leaflet-gpx 버전/구조 차이 대응)
+      function extractNameFromMarker(marker) {
+        if (!marker) return "";
+
+        const popupContent =
+          (marker.getPopup && marker.getPopup() && marker.getPopup().getContent()) || "";
+        const popupText = String(popupContent).replace(/<[^>]*>/g, "").trim();
+
+        const tooltipContent =
+          (marker.getTooltip && marker.getTooltip() && marker.getTooltip().getContent()) || "";
+        const tooltipText = String(tooltipContent).replace(/<[^>]*>/g, "").trim();
+
+        const fromFeature =
+          (marker.feature &&
+            marker.feature.properties &&
+            (marker.feature.properties.name ||
+              marker.feature.properties.desc ||
+              marker.feature.properties.cmt)) || "";
+
+        return String(
+          marker._name ||
+          marker.options?.title ||
+          fromFeature ||
+          tooltipText ||
+          popupText ||
+          ""
+        ).trim();
+      }
+
+      const blueIcon = L.icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+        iconSize: [32, 32]
+      });
+
+      // ✅ 중복 방지용 Set (name + lat,lng)
+      function makeKey(name, lat, lng) {
+        return `${String(name || "").trim()}|${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
+      }
+
+      const existed = new Set(
+        gpxWptIndex
+          .filter(x => x && x.marker && x.marker.getLatLng)
+          .map(x => {
+            const ll = x.marker.getLatLng();
+            return makeKey(x.name, ll.lat, ll.lng);
+          })
+      );
+
+      // ✅ 0) 먼저 현재 gpx 레이어에서 "마커들"을 lat,lng로 맵핑(나중에 XML name 붙이기용)
+      const markerByLatLng = new Map();
+      gpx.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+          const ll = layer.getLatLng();
+          markerByLatLng.set(`${ll.lat.toFixed(6)},${ll.lng.toFixed(6)}`, layer);
+
+          // 혹시라도 leaflet-gpx가 marker에 name을 넣어둔 케이스면 즉시 인덱싱
+          const n = extractNameFromMarker(layer);
+          if (n) {
+            const k = makeKey(n, ll.lat, ll.lng);
+            if (!existed.has(k)) {
+              existed.add(k);
+              gpxWptIndex.push({ name: n, marker: layer });
+            }
+          }
+        }
+      });
+
+      // ✅ 근처 마커 찾기 (좌표가 완전히 같지 않아도 매칭)
+      function findNearestMarker(lat, lon) {
+        const targetLat = Number(lat);
+        const targetLon = Number(lon);
+
+        let best = null;
+        let bestDist = Infinity;
+
+        markerByLatLng.forEach((m) => {
+          if (!(m instanceof L.Marker)) return;
+          const ll = m.getLatLng();
+          const dLat = ll.lat - targetLat;
+          const dLon = ll.lng - targetLon;
+          const dist = dLat*dLat + dLon*dLon;
+
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = m;
+          }
+        });
+
+        // 약 수 m 이내면 같은 WPT로 간주
+        return bestDist < 1e-8 ? best : null;
+      }
+
+
+      // ✅ 1) get_waypoints()가 있으면 거기서도 시도
+      if (typeof gpx.get_waypoints === "function") {
+        const wpts = gpx.get_waypoints() || [];
+        wpts.forEach(w => {
+          const marker = w && (w.marker || w._marker || w);
+          if (!(marker instanceof L.Marker)) return;
+
+          const ll = marker.getLatLng();
+          const name = String(
+            (w && (w.name || w.desc || w.cmt || w.text)) ||
+            extractNameFromMarker(marker) ||
+            ""
+          ).trim();
+
+          if (!name) return;
+
+          const k = makeKey(name, ll.lat, ll.lng);
+          if (!existed.has(k)) {
+          existed.add(k);
+            gpxWptIndex.push({ name, marker });
+          }
+        });
+      }
+
+      // ✅ 2) ★핵심★ GPX 원문(XML)을 직접 파싱해서 <wpt><name>을 확실히 인덱싱
+      // ✅ url은 forEach((url)=>{ ... })의 스코프 변수
+      fetch(url)
+        .then(r => r.text())
+        .then(xmlText => {
+          const parser = new DOMParser();
+          const xml = parser.parseFromString(xmlText, "application/xml");
+          if (xml.querySelector("parsererror")) return;
+
+          const wpts = Array.from(xml.getElementsByTagName("wpt"));
+
+          wpts.forEach(wpt => {
+            const lat = wpt.getAttribute("lat");
+            const lon = wpt.getAttribute("lon");
+            if (!lat || !lon) return;
+
+            const nameEl = wpt.getElementsByTagName("name")[0];
+            const name = String(nameEl ? nameEl.textContent : "").trim();
+            if (!name) return;
+
+            const latNum = Number(lat);
+            const lonNum = Number(lon);
+
+            // ✅ (핵심) leaflet-gpx 마커를 못 찾아도 "직접 마커 생성"해서 인덱싱
+            // 기존 마커가 있으면 그걸 쓰고, 없으면 새로 만듦
+            const lat6 = latNum.toFixed(6);
+            const lon6 = lonNum.toFixed(6);
+
+            let marker = markerByLatLng.get(`${lat6},${lon6}`);
+
+            if (!(marker instanceof L.Marker)) {
+              // 근처 탐색 한번 시도(있으면 사용)
+              marker = findNearestMarker(lat, lon);
+            }
+
+            if (!(marker instanceof L.Marker)) {
+              // ✅ 여기서 새 마커를 직접 생성해서 지도에 올림 (가장 확실)
+              marker = L.marker([latNum, lonNum], { icon: blueIcon });
+              marker.addTo(gpxLayerGroup); // 또는 gpxLayerGroup 대신 map에 addTo(map) 해도 됨
+
+              // (선택) tooltip로 이름 보이게
+              marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
+
+              // markerByLatLng에도 등록(다음에 찾기 쉬움)
+              markerByLatLng.set(`${lat6},${lon6}`, marker);
+            }
+
+            const k = makeKey(name, latNum, lonNum);
+            if (!existed.has(k)) {
+              existed.add(k);
+              gpxWptIndex.push({ name, marker });
+            }
+          });
+
+           console.log("[GPX]", url, "wpt indexed:", gpxWptIndex.length);
+           console.log("sample:", gpxWptIndex.slice(0, 5).map(x => x.name));
+
+        })
+        .catch(() => {
+          // fetch 실패해도 기존 기능 유지 (조용히 무시)
+        });
+
+      // console.log("GPX WPT index:", gpxWptIndex.length, gpxWptIndex.slice(0, 20));
     })
+    /* ✅✅ 여기까지 교체 */
+
     .on("error", function () {
       console.warn("GPX 로드 실패:", url);
     })
     .addTo(gpxLayerGroup);
   });
 
+
+  // ✅ 이건 forEach 밖에서 실행돼야 함
   map.on("click", e=>{
     if(searchMode) return;
     lastClickedCoord = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
     document.getElementById("clickedCoords").innerText = `📍 클릭 좌표: ${lastClickedCoord}`;
     if(window.lastClickMarker) markerCluster.removeLayer(window.lastClickMarker);
-    window.lastClickMarker = L.marker(e.latlng, { icon: L.icon({iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png", iconSize:[32,32]}) }).addTo(markerCluster);
+    window.lastClickMarker = L.marker(e.latlng, {
+      icon: L.icon({
+        iconUrl:"https://maps.google.com/mapfiles/ms/icons/orange-dot.png",
+        iconSize:[32,32]
+      })
+    }).addTo(markerCluster);
   });
 }
 
@@ -289,11 +489,54 @@ document.getElementById("copyRouteBtn").addEventListener("click",()=>{
     .catch(()=>alert("❌ 클립보드 복사 실패"));
 });
 
-function normalizeSimple(str){ return (str||"").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g,""); }
+function normalizeSimple(str){
+  return (str||"")
+    .toLowerCase()
+    // ✅ 숫자/영문/한글만 남기고 나머지는 전부 제거 (ㅡ 포함)
+    .replace(/[^0-9a-z가-힣ㄱ-ㅎㅏ-ㅣ]/g,"");
+}
 
+/* ===== 여기부터 추가 ===== */
+function resetGpxWptHighlight() {
+  const blueIcon = L.icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+    iconSize: [32, 32]
+  });
+
+  highlightedGpxWpts.forEach(m => m.setIcon(blueIcon));
+  highlightedGpxWpts = [];
+}
+
+function highlightGpxWptsByKeyword(keyword) {
+  if (gpxWptIndex.length === 0) return; 
+  resetGpxWptHighlight();
+  if (!keyword) return;
+
+  const kw = normalizeSimple(keyword);
+  if (kw.length < 2) return;
+
+  const kwRegex = new RegExp(kw.split("").join(".*"), "i");
+
+  const redIcon = L.icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+    iconSize: [32, 32]
+  });
+
+  gpxWptIndex.forEach(({ name, marker }) => {
+    const target = normalizeSimple(name);
+    if (kwRegex.test(target)) {
+      marker.setIcon(redIcon);
+      highlightedGpxWpts.push(marker);
+    }
+  });
+}
+ 
 function searchAndShow() {
   const kw = document.getElementById("keyword").value.trim();
   if (!kw) { alert("⚠️ 키워드 입력하세요."); return; }
+
+  highlightGpxWptsByKeyword(kw);
+  
   searchMode = true;
   clearMarkers();
 
@@ -307,13 +550,20 @@ function searchAndShow() {
     return fields.some(f=>kwRegex.test(normalizeSimple(f)));
   }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
 
-  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
+  if (res.length === 0) {
+    // ✅ lampData는 없지만 GPX WPT가 매칭되면 알림 띄우지 않음
+    if (highlightedGpxWpts.length === 0) {
+      alert("❌ 검색 결과 없음");
+    }
+    return;
+  }
+
   const bounds = L.latLngBounds();
   res.forEach(r=>{ addMarker(r.id,r.pos,"blue"); bounds.extend([r.pos.lat,r.pos.lng]); });
   map.fitBounds(bounds);
 }
 
-function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; }
+function resetSearch(){ searchMode=false; clearMarkers(); document.getElementById("keyword").value=""; lastClickedCoord=""; document.getElementById("clickedCoords").innerText="📍"; resetGpxWptHighlight(); }
 
 function navigateToPatrol() {
   if (!lastClickedCoord) {
@@ -416,6 +666,30 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
