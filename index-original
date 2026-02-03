@@ -26,6 +26,7 @@
   #upcomingPanel.hidden { width: 50px; height: 40px; padding: 5px; overflow: hidden; cursor: pointer; }
   #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display: none; }
   #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
+  .gpx-original-hidden { opacity: 0 !important; pointer-events: none !important; }
 </style>
 <script src="lampData.js"></script>
 <script src="patrolSchedule.js"></script>
@@ -93,6 +94,9 @@ let gpxLayerGroup; // GPX 레이어 묶음
 
 let gpxWptIndex = [];        // { name, marker } 목록 (GPX의 모든 wpt 마커)
 let highlightedGpxWpts = []; // 검색으로 색상 변경된 wpt 마커들 (원복용)
+
+let gpxNewWptLayerGroup;   // ✅ 새로 만든 WPT 마커만 모아두는 레이어
+let gpxNewWptIndex = [];   // ✅ 검색/색변화는 이 인덱스만 사용
  
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
@@ -217,6 +221,8 @@ function initMap(){
 
   gpxLayerGroup = L.layerGroup().addTo(map);
 
+  gpxNewWptLayerGroup = L.layerGroup().addTo(map);
+
   // ✅ routes/ 의 GPX 파일들을 지도에 트랙으로 표시
   ROUTE_GPX_FILES.forEach((url) => {
     new L.GPX(url, {
@@ -239,6 +245,34 @@ function initMap(){
     /* ✅✅ 여기부터 교체 */
       .on("loaded", function (e) {
       const gpx = e.target;
+
+      // ✅ gpx 내부(중첩 포함) 모든 마커를 재귀로 찾아 숨김
+      function hideAllGpxMarkers(layer) {
+        if (!layer) return;
+
+        // 1) 마커면 숨김
+        if (layer instanceof L.Marker) {
+          layer.setOpacity(0);
+          layer.options.interactive = false;
+          if (layer._icon) layer._icon.style.pointerEvents = "none";
+
+          // DOM 늦게 생기는 경우까지 보험
+          layer.on("add", () => {
+            layer.setOpacity(0);
+            layer.options.interactive = false;
+            if (layer._icon) layer._icon.style.pointerEvents = "none";
+            const el = layer.getElement && layer.getElement();
+            if (el) el.classList.add("gpx-original-hidden");
+          });
+          return;
+        }
+
+        // 2) 그룹/피처그룹이면 안쪽도 전부 반복
+        if (layer.eachLayer) {
+          layer.eachLayer(child => hideAllGpxMarkers(child));
+        }
+      }
+
 
       // ✅ WPT 이름을 "최대한 많이" 건져오는 헬퍼 (leaflet-gpx 버전/구조 차이 대응)
       function extractNameFromMarker(marker) {
@@ -289,13 +323,36 @@ function initMap(){
       );
 
       // ✅ 0) 먼저 현재 gpx 레이어에서 "마커들"을 lat,lng로 맵핑(나중에 XML name 붙이기용)
+      // ✅ 0) gpx 내부(중첩 포함) 모든 레이어를 재귀로 훑어서
+      //    - 마커는 markerByLatLng에 등록
+      //    - 기존 leaflet-gpx 마커는 "완전 숨김" 처리
       const markerByLatLng = new Map();
-      gpx.eachLayer(layer => {
+
+      function processLayerRecursive(layer) {
+        if (!layer) return;
+
+        // 1) 마커면: 인덱싱 + 숨김
         if (layer instanceof L.Marker) {
           const ll = layer.getLatLng();
+
+          // ✅ markerByLatLng 등록
           markerByLatLng.set(`${ll.lat.toFixed(6)},${ll.lng.toFixed(6)}`, layer);
 
-          // 혹시라도 leaflet-gpx가 marker에 name을 넣어둔 케이스면 즉시 인덱싱
+          // ✅ (핵심) 기존 leaflet-gpx 마커 "완전 숨김"
+          layer.setOpacity(0);                 // 화면에서 100% 안 보이게
+          layer.options.interactive = false;   // 클릭/터치 막기
+          if (layer._icon) layer._icon.style.pointerEvents = "none";
+
+          // ✅ DOM이 늦게 생기는 경우까지 커버(보험)
+          layer.on("add", () => {
+            layer.setOpacity(0);
+            layer.options.interactive = false;
+            if (layer._icon) layer._icon.style.pointerEvents = "none";
+            const el = layer.getElement && layer.getElement();
+            if (el) el.classList.add("gpx-original-hidden");
+          });
+
+          // (선택) 기존 인덱싱 로직 유지: name 추출해서 gpxWptIndex에도 넣기
           const n = extractNameFromMarker(layer);
           if (n) {
             const k = makeKey(n, ll.lat, ll.lng);
@@ -304,8 +361,23 @@ function initMap(){
               gpxWptIndex.push({ name: n, marker: layer });
             }
           }
+
+          return; // ✅ 마커는 여기서 끝
         }
-      });
+
+        // 2) 그룹/GeoJSON/FeatureGroup 등: 하위 레이어 재귀 처리
+        if (typeof layer.eachLayer === "function") {
+          layer.eachLayer(child => processLayerRecursive(child));
+        }
+      }
+
+      // ✅ 실행: gpx 내부(중첩 포함) 전부 처리
+      processLayerRecursive(gpx);
+
+      // ✅ (보험) 로딩/렌더 타이밍 늦는 브라우저에서 한 번 더 숨김 적용
+      setTimeout(() => processLayerRecursive(gpx), 0);
+      setTimeout(() => processLayerRecursive(gpx), 200);
+
 
       // ✅ 근처 마커 찾기 (좌표가 완전히 같지 않아도 매칭)
       function findNearestMarker(lat, lon) {
@@ -380,36 +452,16 @@ function initMap(){
             const latNum = Number(lat);
             const lonNum = Number(lon);
 
-            // ✅ (핵심) leaflet-gpx 마커를 못 찾아도 "직접 마커 생성"해서 인덱싱
-            // 기존 마커가 있으면 그걸 쓰고, 없으면 새로 만듦
-            const lat6 = latNum.toFixed(6);
-            const lon6 = lonNum.toFixed(6);
+            // ✅ 항상 "새 마커" 생성 (모든 WPT가 무조건 새 마커를 가짐)
+            const marker = L.marker([latNum, lonNum], { icon: blueIcon })
+              .addTo(gpxNewWptLayerGroup);
 
-            let marker = markerByLatLng.get(`${lat6},${lon6}`);
+            marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
 
-            if (!(marker instanceof L.Marker)) {
-              // 근처 탐색 한번 시도(있으면 사용)
-              marker = findNearestMarker(lat, lon);
-            }
-
-            if (!(marker instanceof L.Marker)) {
-              // ✅ 여기서 새 마커를 직접 생성해서 지도에 올림 (가장 확실)
-              marker = L.marker([latNum, lonNum], { icon: blueIcon });
-              marker.addTo(gpxLayerGroup); // 또는 gpxLayerGroup 대신 map에 addTo(map) 해도 됨
-
-              // (선택) tooltip로 이름 보이게
-              marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
-
-              // markerByLatLng에도 등록(다음에 찾기 쉬움)
-              markerByLatLng.set(`${lat6},${lon6}`, marker);
-            }
-
-            const k = makeKey(name, latNum, lonNum);
-            if (!existed.has(k)) {
-              existed.add(k);
-              gpxWptIndex.push({ name, marker });
-            }
+            // ✅ 검색/색변화는 새 마커 인덱스로만
+            gpxNewWptIndex.push({ name, marker });
           });
+
 
            console.log("[GPX]", url, "wpt indexed:", gpxWptIndex.length);
            console.log("sample:", gpxWptIndex.slice(0, 5).map(x => x.name));
@@ -508,7 +560,7 @@ function resetGpxWptHighlight() {
 }
 
 function highlightGpxWptsByKeyword(keyword) {
-  if (gpxWptIndex.length === 0) return; 
+  if (gpxNewWptIndex.length === 0) return;   // ✅ ① 대상 변경
   resetGpxWptHighlight();
   if (!keyword) return;
 
@@ -522,14 +574,15 @@ function highlightGpxWptsByKeyword(keyword) {
     iconSize: [32, 32]
   });
 
-  gpxWptIndex.forEach(({ name, marker }) => {
+  gpxNewWptIndex.forEach(({ name, marker }) => { // ✅ ② 대상 변경
     const target = normalizeSimple(name);
     if (kwRegex.test(target)) {
       marker.setIcon(redIcon);
-      highlightedGpxWpts.push(marker);
+      highlightedGpxWpts.push(marker);        // (이 배열은 그대로 사용 가능)
     }
   });
 }
+
  
 function searchAndShow() {
   const kw = document.getElementById("keyword").value.trim();
@@ -666,29 +719,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
