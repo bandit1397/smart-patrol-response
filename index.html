@@ -573,14 +573,36 @@ function highlightGpxWptsByKeyword(keyword) {
     iconSize: [32, 32]
   });
 
-  gpxNewWptIndex.forEach(({ name, marker }) => {
+  const blueIcon = L.icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+    iconSize: [32, 32]
+  });
+
+  // ✅ 1) 검색어와 직접 매칭된 GPX ID 찾기
+  const matchedGpxIds = new Set();
+  gpxNewWptIndex.forEach(({ name, gpxId }) => {
     if (kwRegex.test(normalizeSimple(name))) {
-      marker.setIcon(redIcon);
-      marker.addTo(gpxNewWptLayerGroup); // ✅ 여기서 현출
-      highlightedGpxWpts.push(marker);
+      matchedGpxIds.add(gpxId);
     }
   });
+
+  if (matchedGpxIds.size === 0) return;
+
+  // ✅ 2) 해당 GPX의 모든 WPT 표시
+  gpxNewWptIndex.forEach(({ name, marker, gpxId }) => {
+    if (!matchedGpxIds.has(gpxId)) return;
+
+    if (kwRegex.test(normalizeSimple(name))) {
+      marker.setIcon(redIcon);   // 🔴 검색된 WPT
+    } else {
+      marker.setIcon(blueIcon);  // 🔵 같은 GPX의 다른 WPT
+    }
+
+    marker.addTo(gpxNewWptLayerGroup);
+    highlightedGpxWpts.push(marker);
+  });
 }
+
 
  
 function searchAndShow() {
@@ -718,6 +740,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
