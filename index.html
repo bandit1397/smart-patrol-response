@@ -457,7 +457,11 @@ function initMap(){
             marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
 
             // ✅ 검색/색변화는 새 마커 인덱스로만
-            gpxNewWptIndex.push({ name, marker });
+            gpxNewWptIndex.push({
+              name,
+              marker,
+              gpxId: url   // ⭐ 이 WPT의 소속 GPX
+            });
           });
 
 
@@ -714,6 +718,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
