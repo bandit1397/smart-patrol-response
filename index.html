@@ -411,6 +411,9 @@ function initMap(){
             }
           });
 
+           console.log("[GPX]", url, "wpt indexed:", gpxWptIndex.length);
+           console.log("sample:", gpxWptIndex.slice(0, 5).map(x => x.name));
+
         })
         .catch(() => {
           // fetch 실패해도 기존 기능 유지 (조용히 무시)
@@ -663,6 +666,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
