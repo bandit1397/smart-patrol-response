@@ -239,19 +239,31 @@ function initMap(){
       // ✅ GPX 내 레이어들 중 Marker만 골라서 index에 저장
       gpx.eachLayer(layer => {
         if (layer instanceof L.Marker) {
+
+          // ✅ 추가: popup 내용에서도 name 추출 (leaflet-gpx 일부 케이스 대응)
+          const popupContent =
+            (layer.getPopup && layer.getPopup() && layer.getPopup().getContent()) || "";
+
+          const popupText = String(popupContent).replace(/<[^>]*>/g, ""); // HTML 제거
+
           // Leaflet-GPX는 wpt marker에 _name 같은 값을 붙여두는 경우가 많음
           // 안전하게 여러 후보를 체크
           const name =
             layer._name ||
-            (layer.feature && layer.feature.properties && (layer.feature.properties.name || layer.feature.properties.desc)) ||
+            (layer.feature &&
+              layer.feature.properties &&
+              (layer.feature.properties.name || layer.feature.properties.desc)) ||
             (layer.getTooltip && layer.getTooltip() && layer.getTooltip().getContent()) ||
+            popupText ||  // ✅ 여기서 popupText 사용
             "";
 
-          // name이 없어도 마커는 일단 넣어둠(검색용)
-          gpxWptIndex.push({ name: String(name || "").trim(), marker: layer });
+          gpxWptIndex.push({
+            name: String(name || "").trim(),
+            marker: layer
+          });
         }
       });
-    })
+
     .on("error", function () {
       console.warn("GPX 로드 실패:", url);
     })
@@ -481,6 +493,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
