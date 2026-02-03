@@ -558,8 +558,9 @@ function resetGpxWptHighlight() {
 }
 
 function highlightGpxWptsByKeyword(keyword) {
-  if (gpxNewWptIndex.length === 0) return;   // ✅ ① 대상 변경
-  resetGpxWptHighlight();
+  gpxNewWptLayerGroup.clearLayers();
+  highlightedGpxWpts = [];
+
   if (!keyword) return;
 
   const kw = normalizeSimple(keyword);
@@ -572,11 +573,11 @@ function highlightGpxWptsByKeyword(keyword) {
     iconSize: [32, 32]
   });
 
-  gpxNewWptIndex.forEach(({ name, marker }) => { // ✅ ② 대상 변경
-    const target = normalizeSimple(name);
-    if (kwRegex.test(target)) {
+  gpxNewWptIndex.forEach(({ name, marker }) => {
+    if (kwRegex.test(normalizeSimple(name))) {
       marker.setIcon(redIcon);
-      highlightedGpxWpts.push(marker);        // (이 배열은 그대로 사용 가능)
+      marker.addTo(gpxNewWptLayerGroup); // ✅ 여기서 현출
+      highlightedGpxWpts.push(marker);
     }
   });
 }
@@ -717,6 +718,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
