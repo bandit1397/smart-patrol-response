@@ -324,7 +324,7 @@ function initMap(){
         });
 
         // 약 수 m 이내면 같은 WPT로 간주
-        return bestDist < 1e-9 ? best : null;
+        return bestDist < 1e-8 ? best : null;
       }
 
 
@@ -642,6 +642,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
