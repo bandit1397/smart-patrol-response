@@ -222,11 +222,23 @@ function initMap(){
         opacity: 0.85
       },
       marker_options: {
+        // ✅ 트랙 시작/끝 마커는 기존처럼 숨김 유지
         startIconUrl: null,
         endIconUrl: null,
-        shadowUrl: null
+        shadowUrl: null,
+
+        // ✅ (추가) wpt를 "마커 아이콘"으로 표시
+        // <sym>가 없는 wpt는 ''(빈 키) 매핑이 적용됨
+        wptIconUrls: {
+          "": "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+        },
+
+        // (선택) 아이콘 크기/앵커를 명확히 하고 싶으면 아래도 추가 가능 (필수 아님)
+        // iconSize: [32, 32],
+        // iconAnchor: [16, 32]
       }
     })
+
     .on("loaded", function (e) {
       // map.fitBounds(e.target.getBounds()); // 필요 시 활성화
     })
@@ -416,6 +428,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
