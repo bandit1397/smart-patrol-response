@@ -436,7 +436,7 @@ function normalizeSimple(str){
   return (str||"")
     .toLowerCase()
     // ✅ 숫자/영문/한글만 남기고 나머지는 전부 제거 (ㅡ 포함)
-    .replace(/[^0-9a-z가-힣]/g,"");
+    .replace(/[^0-9a-z가-힣ㄱ-ㅎㅏ-ㅣ]/g,"");
 }
 
 /* ===== 여기부터 추가 ===== */
@@ -609,6 +609,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
