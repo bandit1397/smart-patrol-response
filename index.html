@@ -452,9 +452,7 @@ function initMap(){
             const latNum = Number(lat);
             const lonNum = Number(lon);
 
-            // ✅ 항상 "새 마커" 생성 (모든 WPT가 무조건 새 마커를 가짐)
-            const marker = L.marker([latNum, lonNum], { icon: blueIcon })
-              .addTo(gpxNewWptLayerGroup);
+            const marker = L.marker([latNum, lonNum], { icon: blueIcon });
 
             marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
 
@@ -719,6 +717,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
