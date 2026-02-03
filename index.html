@@ -269,6 +269,11 @@ function initMap(){
         ).trim();
       }
 
+      const blueIcon = L.icon({
+        iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+        iconSize: [32, 32]
+      });
+
       // ✅ 중복 방지용 Set (name + lat,lng)
       function makeKey(name, lat, lng) {
         return `${String(name || "").trim()}|${Number(lat).toFixed(6)},${Number(lng).toFixed(6)}`;
@@ -642,6 +647,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
