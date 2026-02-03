@@ -299,7 +299,11 @@ function initMap(){
           const ll = layer.getLatLng();
           markerByLatLng.set(`${ll.lat.toFixed(6)},${ll.lng.toFixed(6)}`, layer);
 
-          // 혹시라도 leaflet-gpx가 marker에 name을 넣어둔 케이스면 즉시 인덱싱
+          layer.setOpacity(0);
+          const el = layer.getElement();
+          if (el) el.classList.add("gpx-original-hidden");
+          else setTimeout(() => layer.getElement()?.classList.add("gpx-original-hidden"), 0);
+      
           const n = extractNameFromMarker(layer);
           if (n) {
             const k = makeKey(n, ll.lat, ll.lng);
@@ -670,4 +674,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
