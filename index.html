@@ -496,7 +496,7 @@ function resetGpxWptHighlight() {
 }
 
 function highlightGpxWptsByKeyword(keyword) {
-  if (gpxWptIndex.length === 0) return; 
+  if (gpxNewWptIndex.length === 0) return;   // ✅ ① 대상 변경
   resetGpxWptHighlight();
   if (!keyword) return;
 
@@ -510,14 +510,15 @@ function highlightGpxWptsByKeyword(keyword) {
     iconSize: [32, 32]
   });
 
-  gpxWptIndex.forEach(({ name, marker }) => {
+  gpxNewWptIndex.forEach(({ name, marker }) => { // ✅ ② 대상 변경
     const target = normalizeSimple(name);
     if (kwRegex.test(target)) {
       marker.setIcon(redIcon);
-      highlightedGpxWpts.push(marker);
+      highlightedGpxWpts.push(marker);        // (이 배열은 그대로 사용 가능)
     }
   });
 }
+
  
 function searchAndShow() {
   const kw = document.getElementById("keyword").value.trim();
@@ -654,6 +655,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
