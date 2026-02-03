@@ -312,8 +312,46 @@ document.getElementById("copyRouteBtn").addEventListener("click",()=>{
     .catch(()=>alert("❌ 클립보드 복사 실패"));
 });
 
-function normalizeSimple(str){ return (str||"").toLowerCase().replace(/[\s\-\_\.,\/\(\)\[\]#]/g,""); }
+function normalizeSimple(str){
+  return (str||"")
+    .toLowerCase()
+    .replace(/[\s\-\_\.,\/\(\)\[\]#]/g,"");
+}
 
+/* ===== 여기부터 추가 ===== */
+function resetGpxWptHighlight() {
+  const blueIcon = L.icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+    iconSize: [32, 32]
+  });
+
+  highlightedGpxWpts.forEach(m => m.setIcon(blueIcon));
+  highlightedGpxWpts = [];
+}
+
+function highlightGpxWptsByKeyword(keyword) {
+  resetGpxWptHighlight();
+  if (!keyword) return;
+
+  const kw = normalizeSimple(keyword);
+  if (kw.length < 2) return;
+
+  const kwRegex = new RegExp(kw.split("").join(".*"), "i");
+
+  const redIcon = L.icon({
+    iconUrl: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+    iconSize: [32, 32]
+  });
+
+  gpxWptIndex.forEach(({ name, marker }) => {
+    const target = normalizeSimple(name);
+    if (kwRegex.test(target)) {
+      marker.setIcon(redIcon);
+      highlightedGpxWpts.push(marker);
+    }
+  });
+}
+ 
 function searchAndShow() {
   const kw = document.getElementById("keyword").value.trim();
   if (!kw) { alert("⚠️ 키워드 입력하세요."); return; }
@@ -439,6 +477,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
