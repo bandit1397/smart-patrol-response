@@ -85,14 +85,15 @@ let searchMode = false;
 let completedPatrols = new Set(JSON.parse(localStorage.getItem("patrol_" + new Date().toISOString().slice(0,10)) || "[]"));
 let lastClickedMarker = null;
 
-/* 🔴 여기 추가 */
 const ROUTE_GPX_FILES = [
   "routes/patrol_2025-11-24_minimal.gpx",
   "routes/yaeyang_park_minimal.gpx"
 ];
 let gpxLayerGroup; // GPX 레이어 묶음
-/* 🔴 여기까지 */
 
+let gpxWptIndex = [];        // { name, marker } 목록 (GPX의 모든 wpt 마커)
+let highlightedGpxWpts = []; // 검색으로 색상 변경된 wpt 마커들 (원복용)
+ 
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
   updatePatrolDisplay();
@@ -428,6 +429,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
