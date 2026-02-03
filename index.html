@@ -384,7 +384,14 @@ function searchAndShow() {
     return fields.some(f=>kwRegex.test(normalizeSimple(f)));
   }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
 
-  if(res.length===0){ alert("❌ 검색 결과 없음"); return; }
+  if (res.length === 0) {
+    // ✅ lampData는 없지만 GPX WPT가 매칭되면 알림 띄우지 않음
+    if (highlightedGpxWpts.length === 0) {
+      alert("❌ 검색 결과 없음");
+    }
+    return;
+  }
+
   const bounds = L.latLngBounds();
   res.forEach(r=>{ addMarker(r.id,r.pos,"blue"); bounds.extend([r.pos.lat,r.pos.lng]); });
   map.fitBounds(bounds);
@@ -493,6 +500,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
