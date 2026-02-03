@@ -367,6 +367,7 @@ function initMap(){
           if (xml.querySelector("parsererror")) return;
 
           const wpts = Array.from(xml.getElementsByTagName("wpt"));
+
           wpts.forEach(wpt => {
             const lat = wpt.getAttribute("lat");
             const lon = wpt.getAttribute("lon");
@@ -376,25 +377,40 @@ function initMap(){
             const name = String(nameEl ? nameEl.textContent : "").trim();
             if (!name) return;
 
-            const lat6 = Number(lat).toFixed(6);
-            const lon6 = Number(lon).toFixed(6);
+            const latNum = Number(lat);
+            const lonNum = Number(lon);
+
+            // ✅ (핵심) leaflet-gpx 마커를 못 찾아도 "직접 마커 생성"해서 인덱싱
+            // 기존 마커가 있으면 그걸 쓰고, 없으면 새로 만듦
+            const lat6 = latNum.toFixed(6);
+            const lon6 = lonNum.toFixed(6);
 
             let marker = markerByLatLng.get(`${lat6},${lon6}`);
 
             if (!(marker instanceof L.Marker)) {
-              // ✅ 정확히 못 찾으면 근처 마커로 다시 시도
+              // 근처 탐색 한번 시도(있으면 사용)
               marker = findNearestMarker(lat, lon);
             }
 
-            if (!(marker instanceof L.Marker)) return;
+            if (!(marker instanceof L.Marker)) {
+              // ✅ 여기서 새 마커를 직접 생성해서 지도에 올림 (가장 확실)
+              marker = L.marker([latNum, lonNum], { icon: blueIcon });
+              marker.addTo(gpxLayerGroup); // 또는 gpxLayerGroup 대신 map에 addTo(map) 해도 됨
 
+              // (선택) tooltip로 이름 보이게
+              marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
 
-            const k = makeKey(name, lat, lon);
+              // markerByLatLng에도 등록(다음에 찾기 쉬움)
+              markerByLatLng.set(`${lat6},${lon6}`, marker);
+            }
+
+            const k = makeKey(name, latNum, lonNum);
             if (!existed.has(k)) {
               existed.add(k);
               gpxWptIndex.push({ name, marker });
             }
           });
+
         })
         .catch(() => {
           // fetch 실패해도 기존 기능 유지 (조용히 무시)
@@ -647,6 +663,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
