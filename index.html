@@ -246,6 +246,34 @@ function initMap(){
       .on("loaded", function (e) {
       const gpx = e.target;
 
+      // ✅ gpx 내부(중첩 포함) 모든 마커를 재귀로 찾아 숨김
+      function hideAllGpxMarkers(layer) {
+        if (!layer) return;
+
+        // 1) 마커면 숨김
+        if (layer instanceof L.Marker) {
+          layer.setOpacity(0);
+          layer.options.interactive = false;
+          if (layer._icon) layer._icon.style.pointerEvents = "none";
+
+          // DOM 늦게 생기는 경우까지 보험
+          layer.on("add", () => {
+            layer.setOpacity(0);
+            layer.options.interactive = false;
+            if (layer._icon) layer._icon.style.pointerEvents = "none";
+            const el = layer.getElement && layer.getElement();
+            if (el) el.classList.add("gpx-original-hidden");
+          });
+          return;
+        }
+
+        // 2) 그룹/피처그룹이면 안쪽도 전부 반복
+        if (layer.eachLayer) {
+          layer.eachLayer(child => hideAllGpxMarkers(child));
+        }
+      }
+
+
       // ✅ WPT 이름을 "최대한 많이" 건져오는 헬퍼 (leaflet-gpx 버전/구조 차이 대응)
       function extractNameFromMarker(marker) {
         if (!marker) return "";
@@ -668,6 +696,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
