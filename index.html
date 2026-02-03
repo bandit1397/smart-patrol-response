@@ -393,14 +393,9 @@ function initMap(){
             }
 
             if (!(marker instanceof L.Marker)) {
-              // ✅ 여기서 새 마커를 직접 생성해서 지도에 올림 (가장 확실)
               marker = L.marker([latNum, lonNum], { icon: blueIcon });
-              marker.addTo(gpxLayerGroup); // 또는 gpxLayerGroup 대신 map에 addTo(map) 해도 됨
-
-              // (선택) tooltip로 이름 보이게
-              marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
-
-              // markerByLatLng에도 등록(다음에 찾기 쉬움)
+              //marker.addTo(gpxLayerGroup);// 
+              //marker.bindTooltip(name, { direction: "top", offset: [0, -8] });//    
               markerByLatLng.set(`${lat6},${lon6}`, marker);
             }
 
@@ -666,6 +661,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
