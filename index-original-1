@@ -625,10 +625,17 @@ function searchAndShow() {
   }).map(id=>({id,pos:parseCoords(lampData[id].좌표)}));
 
   if (res.length === 0) {
-    // ✅ lampData는 없지만 GPX WPT가 매칭되면 알림 띄우지 않음
-    if (highlightedGpxWpts.length === 0) {
-      alert("❌ 검색 결과 없음");
+    if (highlightedGpxWpts.length > 0) {
+      const bounds = L.latLngBounds();
+      highlightedGpxWpts.forEach(m => {
+        if (m.getLatLng) bounds.extend(m.getLatLng());
+      });
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [30, 30] });
+      }
+      return;
     }
+    alert("❌ 검색 결과 없음");
     return;
   }
 
@@ -740,6 +747,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
