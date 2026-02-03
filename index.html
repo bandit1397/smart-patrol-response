@@ -94,6 +94,9 @@ let gpxLayerGroup; // GPX 레이어 묶음
 
 let gpxWptIndex = [];        // { name, marker } 목록 (GPX의 모든 wpt 마커)
 let highlightedGpxWpts = []; // 검색으로 색상 변경된 wpt 마커들 (원복용)
+
+let gpxNewWptLayerGroup;   // ✅ 새로 만든 WPT 마커만 모아두는 레이어
+let gpxNewWptIndex = [];   // ✅ 검색/색변화는 이 인덱스만 사용
  
 function setActiveCategories(selectedCategories){
   activeCategories = selectedCategories.filter(cat => patrolSchedules.hasOwnProperty(cat));
@@ -667,4 +670,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
