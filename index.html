@@ -451,6 +451,7 @@ function resetGpxWptHighlight() {
 }
 
 function highlightGpxWptsByKeyword(keyword) {
+  if (gpxWptIndex.length === 0) return; 
   resetGpxWptHighlight();
   if (!keyword) return;
 
@@ -608,6 +609,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
