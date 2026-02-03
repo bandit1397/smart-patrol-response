@@ -388,36 +388,16 @@ function initMap(){
             const latNum = Number(lat);
             const lonNum = Number(lon);
 
-            // ✅ (핵심) leaflet-gpx 마커를 못 찾아도 "직접 마커 생성"해서 인덱싱
-            // 기존 마커가 있으면 그걸 쓰고, 없으면 새로 만듦
-            const lat6 = latNum.toFixed(6);
-            const lon6 = lonNum.toFixed(6);
+            // ✅ 항상 "새 마커" 생성 (모든 WPT가 무조건 새 마커를 가짐)
+            const marker = L.marker([latNum, lonNum], { icon: blueIcon })
+              .addTo(gpxNewWptLayerGroup);
 
-            let marker = markerByLatLng.get(`${lat6},${lon6}`);
+            marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
 
-            if (!(marker instanceof L.Marker)) {
-              // 근처 탐색 한번 시도(있으면 사용)
-              marker = findNearestMarker(lat, lon);
-            }
-
-            if (!(marker instanceof L.Marker)) {
-              // ✅ 여기서 새 마커를 직접 생성해서 지도에 올림 (가장 확실)
-              marker = L.marker([latNum, lonNum], { icon: blueIcon });
-              marker.addTo(gpxLayerGroup); // 또는 gpxLayerGroup 대신 map에 addTo(map) 해도 됨
-
-              // (선택) tooltip로 이름 보이게
-              marker.bindTooltip(name, { direction: "top", offset: [0, -8] });
-
-              // markerByLatLng에도 등록(다음에 찾기 쉬움)
-              markerByLatLng.set(`${lat6},${lon6}`, marker);
-            }
-
-            const k = makeKey(name, latNum, lonNum);
-            if (!existed.has(k)) {
-              existed.add(k);
-              gpxWptIndex.push({ name, marker });
-            }
+            // ✅ 검색/색변화는 새 마커 인덱스로만
+            gpxNewWptIndex.push({ name, marker });
           });
+
 
            console.log("[GPX]", url, "wpt indexed:", gpxWptIndex.length);
            console.log("sample:", gpxWptIndex.slice(0, 5).map(x => x.name));
@@ -674,6 +654,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
