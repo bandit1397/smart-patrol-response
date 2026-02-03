@@ -355,6 +355,9 @@ function highlightGpxWptsByKeyword(keyword) {
 function searchAndShow() {
   const kw = document.getElementById("keyword").value.trim();
   if (!kw) { alert("⚠️ 키워드 입력하세요."); return; }
+
+  highlightGpxWptsByKeyword(kw);
+  
   searchMode = true;
   clearMarkers();
 
@@ -477,6 +480,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
