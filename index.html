@@ -548,14 +548,10 @@ function normalizeSimple(str){
 
 /* ===== 여기부터 추가 ===== */
 function resetGpxWptHighlight() {
-  const blueIcon = L.icon({
-    iconUrl: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
-    iconSize: [32, 32]
-  });
-
-  highlightedGpxWpts.forEach(m => m.setIcon(blueIcon));
+  gpxNewWptLayerGroup.clearLayers();
   highlightedGpxWpts = [];
 }
+
 
 function highlightGpxWptsByKeyword(keyword) {
   gpxNewWptLayerGroup.clearLayers();
@@ -718,6 +714,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
