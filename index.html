@@ -221,6 +221,8 @@ function initMap(){
 
   gpxLayerGroup = L.layerGroup().addTo(map);
 
+  gpxNewWptLayerGroup = L.layerGroup().addTo(map);
+
   // ✅ routes/ 의 GPX 파일들을 지도에 트랙으로 표시
   ROUTE_GPX_FILES.forEach((url) => {
     new L.GPX(url, {
@@ -670,5 +672,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
