@@ -348,8 +348,15 @@ function initMap(){
             const lat6 = Number(lat).toFixed(6);
             const lon6 = Number(lon).toFixed(6);
 
-            const marker = markerByLatLng.get(`${lat6},${lon6}`);
+            let marker = markerByLatLng.get(`${lat6},${lon6}`);
+
+            if (!(marker instanceof L.Marker)) {
+              // ✅ 정확히 못 찾으면 근처 마커로 다시 시도
+              marker = findNearestMarker(lat, lon);
+            }
+
             if (!(marker instanceof L.Marker)) return;
+
 
             const k = makeKey(name, lat, lon);
             if (!existed.has(k)) {
@@ -609,6 +616,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 </script>
 </body>
 </html>
+
 
 
 
