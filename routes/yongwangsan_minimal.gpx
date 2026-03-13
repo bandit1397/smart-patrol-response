@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="com.ngt.android.nadeuli" schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/gpx/1/1/gpx.xsd" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.garmin.com/xmlschemas/PowerExtension/v1 http://www.garmin.com/xmlschemas/PowerExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpxpx="http://www.garmin.com/xmlschemas/PowerExtension/v1" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2">
-  <metadata>
-    <name>Track_2026-03-11_1329</name>
-    <author>
-      <name>gpx.studio</name>
-      <link href="https://gpx.studio"/>
-    </author>
-    <time>2026-03-11T04:29:38.000Z</time>
-  </metadata>
+<gpx version="1.1" creator="gpx.studio"
+xmlns="http://www.topografix.com/GPX/1/1">
+
+<metadata>
+  <name>Track_2026-03-11_1329</name>
+  <time>2026-03-11T04:29:38Z</time>
+</metadata>
   <wpt lat="37.538737" lon="126.873022">
-    <ele>20.20543137812092</ele>
-    
     <name>양천구 관리번호 02 058</name>
   </wpt>
   <wpt lat="37.53908393383055" lon="126.87295697629452">
@@ -38,20 +34,15 @@
     <name>용왕산공원 1-10</name>
   </wpt>
   <wpt lat="37.539373788322116" lon="126.87362370580979">
-    <ele>48.35379</ele>
-    
     <name>용왕산공원 1-8</name>
   </wpt>
   <wpt lat="37.5395746971224" lon="126.87367513775826">
-    
     <name>다목적CCTV 관리번호 공원 092</name>
   </wpt>
   <wpt lat="37.53975600755395" lon="126.87374956905842">
-    
     <name>용왕산공원 1-7</name>
   </wpt>
   <wpt lat="37.54009151044488" lon="126.87374085187912">
-    
     <name>용왕산공원 1-10</name>
   </wpt>
   <wpt lat="37.53999580454432" lon="126.87375828623772">
