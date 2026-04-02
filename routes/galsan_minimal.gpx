@@ -445,6 +445,28 @@ xmlns="http://www.topografix.com/GPX/1/1">
     <name>갈산공원 1-27</name>
   </wpt>
 
+  <wpt lat="37.50866967" lon="126.86983273">
+    <name>갈산공원 5-20</name>
+  </wpt>
+  <wpt lat="37.50886942" lon="126.86998183">
+    <name>갈산공원 5-19</name>
+  </wpt>
+  <wpt lat="37.50901365" lon="126.87012026">
+    <name>갈산공원 5-18</name>
+  </wpt>
+  <wpt lat="37.50919969" lon="126.87022039">
+    <name>갈산공원 5-17</name>
+  </wpt>
+  <wpt lat="37.50930024" lon="126.87037725">
+    <name>갈산공원 5-16</name>
+  </wpt>
+  <wpt lat="37.50956011" lon="126.8705077">
+    <name>갈산공원 5-15</name>
+  </wpt>
+  <wpt lat="37.50976521" lon="126.87065497">
+    <name>갈산공원 5-14</name>
+  </wpt>
+
  <trk>
     <name>Track 2026-03-30 15:28</name>
     <trkseg>
@@ -1529,64 +1551,64 @@ xmlns="http://www.topografix.com/GPX/1/1">
     <name>Track 2026-03-31 15:10</name>
     <trkseg>
       <trkpt lat="37.5068703" lon="126.8678313">
-        <ele>59.66002</ele>
-        <time>2026-03-31T06:10:26.000Z</time>
       </trkpt>
       <trkpt lat="37.5068197" lon="126.8677266">
-        <ele>59.93901</ele>
-        <time>2026-03-31T06:10:43.000Z</time>
       </trkpt>
       <trkpt lat="37.5067619" lon="126.8676382">
-        <ele>59.899582</ele>
-        <time>2026-03-31T06:10:54.000Z</time>
       </trkpt>
       <trkpt lat="37.5067669" lon="126.8675193">
-        <ele>62.834396</ele>
-        <time>2026-03-31T06:11:36.000Z</time>
       </trkpt>
       <trkpt lat="37.5067467" lon="126.8673979">
-        <ele>60.39543</ele>
-        <time>2026-03-31T06:11:46.000Z</time>
       </trkpt>
       <trkpt lat="37.5067742" lon="126.8672828">
-        <ele>56.42961</ele>
-        <time>2026-03-31T06:11:56.000Z</time>
       </trkpt>
       <trkpt lat="37.5068125" lon="126.8673876">
-        <ele>52.046432</ele>
-        <time>2026-03-31T06:12:12.000Z</time>
       </trkpt>
       <trkpt lat="37.5069025" lon="126.8673485">
-        <ele>53.770004</ele>
-        <time>2026-03-31T06:12:25.000Z</time>
       </trkpt>
       <trkpt lat="37.506996" lon="126.8673592">
-        <ele>49.646164</ele>
-        <time>2026-03-31T06:13:11.000Z</time>
       </trkpt>
       <trkpt lat="37.5070808" lon="126.8674184">
-        <ele>48.05156</ele>
-        <time>2026-03-31T06:13:25.000Z</time>
       </trkpt>
       <trkpt lat="37.5070776" lon="126.8675358">
-        <ele>49.13774</ele>
-        <time>2026-03-31T06:13:42.000Z</time>
       </trkpt>
       <trkpt lat="37.5070403" lon="126.8676433">
-        <ele>51.331894</ele>
-        <time>2026-03-31T06:14:24.000Z</time>
       </trkpt>
       <trkpt lat="37.5070577" lon="126.8677574">
-        <ele>52.674545</ele>
-        <time>2026-03-31T06:14:36.000Z</time>
       </trkpt>
       <trkpt lat="37.5070804" lon="126.8678763">
-        <ele>55.00383</ele>
-        <time>2026-03-31T06:14:48.000Z</time>
       </trkpt>
       <trkpt lat="37.507084" lon="126.8679953">
-        <ele>60.590744</ele>
-        <time>2026-03-31T06:15:02.000Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+
+  <trk>
+    <name>Track 2026-03-31 15:21</name>
+    <trkseg>
+      <trkpt lat="37.5076455" lon="126.8683782">
+      </trkpt>
+    </trkseg>
+  </trk>
+
+ <trk>
+    <name>Track 2026-03-31 15:26</name>
+    <trkseg>
+      <trkpt lat="37.5084901" lon="126.869722">
+      </trkpt>
+      <trkpt lat="37.508878877771856" lon="126.87000681820301">
+      </trkpt>
+      <trkpt lat="37.50926765554371" lon="126.87029163640601">
+      </trkpt>
+      <trkpt lat="37.50965643331556" lon="126.87057645460902">
+      </trkpt>
+      <trkpt lat="37.5097366149631" lon="126.87063519560303">
+      </trkpt>
+      <trkpt lat="37.5097366149631" lon="126.87063519560303">
+      </trkpt>
+      <trkpt lat="37.5097366149631" lon="126.87063519560303">
+      </trkpt>
+      <trkpt lat="37.50988867498788" lon="126.87072549710507">
       </trkpt>
     </trkseg>
   </trk>
