@@ -422,6 +422,29 @@ xmlns="http://www.topografix.com/GPX/1/1">
     <name>갈산공원 5-26</name>
   </wpt>
 
+  <wpt lat="37.50657398" lon="126.86782015">
+    <name>갈산공원 1-23</name>
+  </wpt>
+  <wpt lat="37.5068371" lon="126.86782239">
+    <name>갈산공원 1-24</name>
+  </wpt>
+  <wpt lat="37.50709864" lon="126.86801949">
+    <name>갈산공원 1-25</name>
+  </wpt>
+  <wpt lat="37.50718518" lon="126.86814524">
+    <name>갈산공원 1-26</name>
+  </wpt>
+
+  <wpt lat="37.50675218" lon="126.86759335">
+    <name>갈산공원 1-29</name>
+  </wpt>
+  <wpt lat="37.50698288" lon="126.86734745">
+    <name>갈산공원 1-28</name>
+  </wpt>
+  <wpt lat="37.50704275" lon="126.86763373">
+    <name>갈산공원 1-27</name>
+  </wpt>
+
  <trk>
     <name>Track 2026-03-30 15:28</name>
     <trkseg>
@@ -1466,6 +1489,104 @@ xmlns="http://www.topografix.com/GPX/1/1">
       <trkpt lat="37.507197244387655" lon="126.86836671037076">
       </trkpt>
       <trkpt lat="37.507037912213306" lon="126.86851276204521">
+      </trkpt>
+    </trkseg>
+  </trk>
+
+ <trk>
+    <name>Track 2026-03-31 14:56</name>
+    <trkseg>
+      <trkpt lat="37.506480879149194" lon="126.8678435058024">
+      </trkpt>
+      <trkpt lat="37.506534873814196" lon="126.8678317426024">
+      </trkpt>
+      <trkpt lat="37.506534873814196" lon="126.8678317426024">
+      </trkpt>
+      <trkpt lat="37.5065933" lon="126.8678043">
+      </trkpt>
+      <trkpt lat="37.5066774" lon="126.8678456">
+      </trkpt>
+      <trkpt lat="37.5067759" lon="126.8678203">
+      </trkpt>
+      <trkpt lat="37.5068727" lon="126.8678291">
+      </trkpt>
+      <trkpt lat="37.506971" lon="126.8678345">
+      </trkpt>
+      <trkpt lat="37.5070436" lon="126.8679191">
+      </trkpt>
+      <trkpt lat="37.5070939" lon="126.8680157">
+      </trkpt>
+      <trkpt lat="37.5071464" lon="126.868108">
+      </trkpt>
+      <trkpt lat="37.5072229" lon="126.868178">
+      </trkpt>
+      <trkpt lat="37.5073098" lon="126.8682215">
+      </trkpt>
+    </trkseg>
+  </trk>
+
+ <trk>
+    <name>Track 2026-03-31 15:10</name>
+    <trkseg>
+      <trkpt lat="37.5068703" lon="126.8678313">
+        <ele>59.66002</ele>
+        <time>2026-03-31T06:10:26.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5068197" lon="126.8677266">
+        <ele>59.93901</ele>
+        <time>2026-03-31T06:10:43.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5067619" lon="126.8676382">
+        <ele>59.899582</ele>
+        <time>2026-03-31T06:10:54.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5067669" lon="126.8675193">
+        <ele>62.834396</ele>
+        <time>2026-03-31T06:11:36.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5067467" lon="126.8673979">
+        <ele>60.39543</ele>
+        <time>2026-03-31T06:11:46.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5067742" lon="126.8672828">
+        <ele>56.42961</ele>
+        <time>2026-03-31T06:11:56.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5068125" lon="126.8673876">
+        <ele>52.046432</ele>
+        <time>2026-03-31T06:12:12.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5069025" lon="126.8673485">
+        <ele>53.770004</ele>
+        <time>2026-03-31T06:12:25.000Z</time>
+      </trkpt>
+      <trkpt lat="37.506996" lon="126.8673592">
+        <ele>49.646164</ele>
+        <time>2026-03-31T06:13:11.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5070808" lon="126.8674184">
+        <ele>48.05156</ele>
+        <time>2026-03-31T06:13:25.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5070776" lon="126.8675358">
+        <ele>49.13774</ele>
+        <time>2026-03-31T06:13:42.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5070403" lon="126.8676433">
+        <ele>51.331894</ele>
+        <time>2026-03-31T06:14:24.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5070577" lon="126.8677574">
+        <ele>52.674545</ele>
+        <time>2026-03-31T06:14:36.000Z</time>
+      </trkpt>
+      <trkpt lat="37.5070804" lon="126.8678763">
+        <ele>55.00383</ele>
+        <time>2026-03-31T06:14:48.000Z</time>
+      </trkpt>
+      <trkpt lat="37.507084" lon="126.8679953">
+        <ele>60.590744</ele>
+        <time>2026-03-31T06:15:02.000Z</time>
       </trkpt>
     </trkseg>
   </trk>
