@@ -80,6 +80,25 @@ xmlns="http://www.topografix.com/GPX/1/1">
     <name>갈산공원 3-17</name>
   </wpt>
 
+  <wpt lat="37.50534824" lon="126.86778906">
+    <name>공원등 20-41</name>
+  </wpt>
+  <wpt lat="37.5053281313906" lon="126.86783921972773">
+    <name>갈산 위치번호 4-12</name>
+  </wpt>
+  <wpt lat="37.50528114" lon="126.86805405">
+    <name>공원등 20-42</name>
+  </wpt>
+  <wpt lat="37.50539257179585" lon="126.86833617426146">
+    <name>공원등 20-43</name>
+  </wpt>
+  <wpt lat="37.50524834" lon="126.86862084">
+    <name>공원등 20-44</name>
+  </wpt>
+  <wpt lat="37.50562012844567" lon="126.86905503083864">
+    <name>갈산 위치번호 4-10</name>
+  </wpt>
+
  <trk>
     <trkseg>
       <trkpt lat="37.5056399" lon="126.8673419">
@@ -178,6 +197,95 @@ xmlns="http://www.topografix.com/GPX/1/1">
       </trkpt>
     </trkseg>
   </trk>
+
+ <trk>
+    <name>Track 2026-03-30 16:45</name>
+    <trkseg>
+      <trkpt lat="37.505467" lon="126.8675962">
+      </trkpt>
+    </trkseg>
+  </trk>
+
+ <trk>
+    <name>Track 2026-03-30 16:46</name>
+    <trkseg>
+      <trkpt lat="37.50546923862346" lon="126.86753188186327">
+      </trkpt>
+      <trkpt lat="37.505503027727094" lon="126.86762582225877">
+      </trkpt>
+      <trkpt lat="37.505503027727094" lon="126.86762582225877">
+      </trkpt>
+      <trkpt lat="37.5054907" lon="126.8677019">
+      </trkpt>
+      <trkpt lat="37.5054077" lon="126.8677555">
+      </trkpt>
+      <trkpt lat="37.5053335" lon="126.8678211">
+      </trkpt>
+      <trkpt lat="37.5052742" lon="126.8679151">
+      </trkpt>
+      <trkpt lat="37.5052746" lon="126.8680295">
+      </trkpt>
+      <trkpt lat="37.5053035" lon="126.8681409">
+      </trkpt>
+      <trkpt lat="37.5053609" lon="126.8682353">
+      </trkpt>
+      <trkpt lat="37.5053941" lon="126.8683414">
+      </trkpt>
+      <trkpt lat="37.5053748" lon="126.8684531">
+      </trkpt>
+      <trkpt lat="37.505301" lon="126.8685337">
+      </trkpt>
+      <trkpt lat="37.5052433" lon="126.8686218">
+      </trkpt>
+      <trkpt lat="37.5052291" lon="126.8687399">
+      </trkpt>
+      <trkpt lat="37.5052291" lon="126.8687399">
+      </trkpt>
+      <trkpt lat="37.5055183696866" lon="126.86893293923265">
+      </trkpt>
+      <trkpt lat="37.505647361263144" lon="126.86909053856084">
+      </trkpt>
+      <trkpt lat="37.505647361263144" lon="126.86909053856084">
+      </trkpt>
+      <trkpt lat="37.50567712851867" lon="126.86913806851737">
+      </trkpt>
+      <trkpt lat="37.50567712851867" lon="126.86913806851737">
+      </trkpt>
+      <trkpt lat="37.50569140713447" lon="126.86923047889432">
+      </trkpt>
+      <trkpt lat="37.50569140713447" lon="126.86923047889432">
+      </trkpt>
+      <trkpt lat="37.5056913" lon="126.8692346">
+      </trkpt>
+      <trkpt lat="37.505634" lon="126.8693285">
+      </trkpt>
+      <trkpt lat="37.50567" lon="126.8694346">
+      </trkpt>
+      <trkpt lat="37.5057572" lon="126.8694719">
+      </trkpt>
+      <trkpt lat="37.5058469" lon="126.8695208">
+      </trkpt>
+      <trkpt lat="37.50594" lon="126.8695637">
+      </trkpt>
+      <trkpt lat="37.5060175" lon="126.8696225">
+      </trkpt>
+      <trkpt lat="37.5061004" lon="126.8696835">
+      </trkpt>
+      <trkpt lat="37.5061884" lon="126.8697314">
+      </trkpt>
+      <trkpt lat="37.50622969328111" lon="126.86976450626132">
+      </trkpt>
+      <trkpt lat="37.50622969328111" lon="126.86976450626132">
+      </trkpt>
+      <trkpt lat="37.50629982729745" lon="126.86981890845169">
+      </trkpt>
+      <trkpt lat="37.50629982729745" lon="126.86981890845169">
+      </trkpt>
+      <trkpt lat="37.5063280504457" lon="126.86981202549595">
+      </trkpt>
+    </trkseg>
+  </trk>
+
 </gpx>
 
   
