@@ -28,18 +28,20 @@
   #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
   .gpx-original-hidden { opacity: 0 !important; pointer-events: none !important; }
 
-  #panelToggleBtn {
+  #hidePanelBtn { background:#6c757d; color:white; border:none; padding:10px; border-radius:5px; font-size:14px; cursor:pointer; width:90%; max-width:350px; margin:10px auto; display:block; }
+
+  #showPanelBtn {
+    display: none;
     position: fixed;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: 60px;
+    left: 10px;
     z-index: 10000;
     background: #007bff;
     color: white;
     border: none;
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 13px;
     cursor: pointer;
     box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
   }
@@ -50,6 +52,9 @@
   body.panel-hidden #map {
     height: 100vh;
   }
+  body.panel-hidden #showPanelBtn {
+    display: block;
+  }
 </style>
 <script src="lampData.js"></script>
 <script src="patrolSchedule.js"></script>
@@ -59,7 +64,7 @@
 
 </head>
 <body>
-<button id="panelToggleBtn" onclick="togglePanel()">🔽 패널 숨기기</button>
+<button id="showPanelBtn" onclick="togglePanel()">🔼 패널 보이기</button>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
 
 <div id="panel">
@@ -86,6 +91,8 @@
   <button id="logBtn" onclick="toggleLogViewer()" style="flex:1; background:#ffc107; color:white; border:none; padding:10px; border-radius:5px; font-size:14px; cursor:pointer;">📋 순찰 로그</button>
   <button id="navigateBtn" onclick="navigateToPatrol()" style="flex:1; background:#007bff; color:white; border:none; padding:10px; border-radius:5px; font-size:14px; cursor:pointer;">📍 길찾기</button>
   </div>
+
+  <button id="hidePanelBtn" onclick="togglePanel()">🔽 패널 숨기기</button>
 
   <!-- 로그 textarea -->
   <textarea id="logContent" readonly
@@ -794,7 +801,6 @@ function toggleLogViewer(){
 // 📐 상단 패널(순찰카테고리/키워드입력/검색/초기화/순찰완료 등) 접기/펼치기
 function togglePanel(){
   const hidden = document.body.classList.toggle("panel-hidden");
-  document.getElementById("panelToggleBtn").textContent = hidden ? "🔼 패널 보이기" : "🔽 패널 숨기기";
   localStorage.setItem("panelHidden", hidden ? "1" : "0");
   // 지도 컨테이너 크기가 바뀌었으므로 Leaflet에 재계산 알려주기
   setTimeout(()=>{ if(map) map.invalidateSize(); }, 300);
@@ -809,7 +815,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
   // ✅ 새로고침(자동 5분 새로고침 포함)에도 패널 숨김 상태 유지
   if(localStorage.getItem("panelHidden")==="1"){
     document.body.classList.add("panel-hidden");
-    document.getElementById("panelToggleBtn").textContent = "🔼 패널 보이기";
   }
 
   initMap();
