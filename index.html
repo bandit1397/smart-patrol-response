@@ -27,6 +27,29 @@
   #upcomingPanel.hidden h4, #upcomingPanel.hidden ul { display: none; }
   #upcomingPanel.hidden::after { content: "⏰"; position: absolute; top: 10px; left: 15px; font-size: 20px; color: #007bff; }
   .gpx-original-hidden { opacity: 0 !important; pointer-events: none !important; }
+
+  #panelToggleBtn {
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+  }
+  body.panel-hidden h3,
+  body.panel-hidden #panel {
+    display: none;
+  }
+  body.panel-hidden #map {
+    height: 100vh;
+  }
 </style>
 <script src="lampData.js"></script>
 <script src="patrolSchedule.js"></script>
@@ -36,6 +59,7 @@
 
 </head>
 <body>
+<button id="panelToggleBtn" onclick="togglePanel()">🔽 패널 숨기기</button>
 <h3>🚓 함께 만드는 순찰/출동 poi(신정2)</h3>
 
 <div id="panel">
@@ -767,13 +791,30 @@ function toggleLogViewer(){
   }
 }
 
+// 📐 상단 패널(순찰카테고리/키워드입력/검색/초기화/순찰완료 등) 접기/펼치기
+function togglePanel(){
+  const hidden = document.body.classList.toggle("panel-hidden");
+  document.getElementById("panelToggleBtn").textContent = hidden ? "🔼 패널 보이기" : "🔽 패널 숨기기";
+  localStorage.setItem("panelHidden", hidden ? "1" : "0");
+  // 지도 컨테이너 크기가 바뀌었으므로 Leaflet에 재계산 알려주기
+  setTimeout(()=>{ if(map) map.invalidateSize(); }, 300);
+}
+
 document.addEventListener("DOMContentLoaded", ()=>{
   // 처음에는 textarea 닫힘 상태 유지
   document.getElementById("upcomingPanel").addEventListener("click",e=>{
     if(e.target.tagName.toLowerCase()!=="li") e.currentTarget.classList.toggle("hidden");
   });
-  initMap(); 
+
+  // ✅ 새로고침(자동 5분 새로고침 포함)에도 패널 숨김 상태 유지
+  if(localStorage.getItem("panelHidden")==="1"){
+    document.body.classList.add("panel-hidden");
+    document.getElementById("panelToggleBtn").textContent = "🔼 패널 보이기";
+  }
+
+  initMap();
   updatePatrolDisplay();
+  setTimeout(()=>{ if(map) map.invalidateSize(); }, 300);
 });
 </script>
 </body>
